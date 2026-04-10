@@ -46,13 +46,15 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // --- PRZYKŁADOWE DANE (Wzorce z Twojego Worda) ---
+        // --- PRZYKŁADOWE DANE ---
         const SAMPLES = {
             wiosna: {
                 title: "Wiosna budzi się do życia",
                 duration: "45-50 minut",
                 group: "18-22 dzieci, wiek 5-6 lat",
+                methods: "Aktywizująca (taniec, drama, kolaż)",
                 main_goal: "Rozwijanie wrażliwości na zmiany w przyrodzie, ćwiczenie mowy, ruchowej koordynacji oraz pracy w grupie.",
+                custom_goal: "Kształtowanie umiejętności uważnej obserwacji otoczenia.",
                 phases: [
                     { step_name: "1. Powitanie i krąg poranny", time: "5-6 min", details: "- Dzieci siadają w kręgu na dywanie.\n- Piosenka powitalna: „Dzień dobry, witaj w naszym kręgu”.\n- Zabawa „Co zmieniło się na dworze?”: Pytania o kwiaty, ptaki i słońce." },
                     { step_name: "2. Rozgrzewka ruchowa", time: "6-7 min", details: "- Piosenka: „Wiosna tańczy”.\n- Ruchy: „Drzewa rosną”, „Ptaki fruwają”, „Deszczyk pada”, „Motylki latają”." },
@@ -68,7 +70,9 @@
                 title: "Dbamy o naszą Ziemię – jesteśmy jej przyjaciółmi",
                 duration: "45-50 minut",
                 group: "18-22 dzieci, wiek 5-6 lat",
+                methods: "Metoda projektowa, pokazowa, praktyczne działanie",
                 main_goal: "Kształtowanie postaw proekologicznych, zrozumienie segregacji śmieci, oszczędzania wody i energii.",
+                custom_goal: "Uświadomienie dzieciom wpływu jednostki na stan całej planety.",
                 phases: [
                     { step_name: "1. Powitanie i krąg poranny", time: "5-6 min", details: "- Powitanie piosenką: „Dzień dobry, Ziemio zielona”.\n- Rozmowa o Dniu Ziemi przy globusie.\n- Zabawa „Prawda czy fałsz?” (zasady ekologii)." },
                     { step_name: "2. Rozgrzewka ruchowa", time: "6-7 min", details: "- „Podróż rakietą wokół Ziemi”.\n- Ruchy: Start rakiety, lot w kosmosie, sprzątanie planety, sadzenie drzew." },
@@ -82,7 +86,6 @@
             }
         };
 
-        // --- KOMPONENT IKON (SVG) ---
         const Icon = ({ name, size = 20, className = "" }) => {
             const icons = {
                 FileText: (<><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></>),
@@ -108,23 +111,23 @@
             const [accessCode, setAccessCode] = useState('');
             const [isGenerating, setIsGenerating] = useState(false);
 
-            // Stan formularza
             const [params, setParams] = useState({
                 topic: '',
                 age: '5-6 latki',
-                duration: '45-50 minut',
+                duration: '45-50 min',
                 methods: 'Aktywizująca i ruchowa',
                 needs: 'Standardowa grupa',
-                formatType: 'detailed', // 'detailed' (lista) lub 'concise' (akapit)
+                formatType: 'detailed',
                 customGoal: ''
             });
 
-            // Stan scenariusza
             const [scenario, setScenario] = useState({
                 title: 'Temat Zajęć',
                 duration: '45 min',
                 group: '5-6 lat',
+                methods: 'Wybierz parametry...',
                 main_goal: 'Wpisz temat, aby wygenerować scenariusz...',
+                custom_goal: '',
                 phases: [],
                 materials: [],
                 integration: '',
@@ -143,11 +146,11 @@
                 if (!params.topic.trim()) return alert('Wpisz temat zajęć!');
                 setIsGenerating(true);
                 
-                const systemPrompt = `Jesteś wybitnym metodykiem edukacji. Zawsze odpowiadaj WYŁĄCZNIE formatem JSON.
-                Struktura: { "title": "Temat", "duration": "Czas", "group": "Wiek", "main_goal": "Cele", "phases": [{ "step_name": "Nazwa", "time": "Czas", "details": "Szczegóły" }], "materials": ["lista"], "integration": "integracja", "weather_alternative": "pogoda", "adjustments": "SPE" }
-                Ważne: Jeśli format to "detailed", w polu "details" używaj myślników i nowych linii (\n) dla każdego podpunktu.`;
+                const systemPrompt = `Jesteś wybitnym metodykiem edukacji przedszkolnej i wczesnoszkolnej w Polsce. Zawsze odpowiadaj WYŁĄCZNIE formatem JSON.
+                Struktura: { "title": "...", "duration": "...", "group": "...", "methods": "...", "main_goal": "...", "custom_goal": "...", "phases": [{ "step_name": "...", "time": "...", "details": "..." }], "materials": ["..."], "integration": "...", "weather_alternative": "...", "adjustments": "..." }
+                Zasada FORMATU: Jeśli wybrano format "detailed", w polu "details" KAŻDY punkt musi zaczynać się od myślnika i nowej linii (\\n).`;
 
-                const userPrompt = `Wygeneruj pełny scenariusz. Temat: ${params.topic}. Grupa: ${params.age}. Czas: ${params.duration}. Metoda: ${params.methods}. Formatowanie: ${params.formatType === 'detailed' ? 'Wypunktowane listy krok po kroku' : 'Zwięzłe opisy akapitowe'}.`;
+                const userPrompt = `Temat: ${params.topic}. Grupa: ${params.age}. Czas: ${params.duration}. Metoda: ${params.methods}. Potrzeby: ${params.needs}. Cel nauczyciela: ${params.customGoal}. Formatowanie: ${params.formatType === 'detailed' ? 'lista punktowa krok po kroku' : 'zwięzłe opisy akapitowe'}.`;
 
                 try {
                     const res = await fetch('/api/chat', {
@@ -168,10 +171,9 @@
                 }
             };
 
-            // EKSPORT DO WORD (.DOCX)
             const exportToWord = () => {
                 const content = document.getElementById('scenario-container').innerHTML;
-                const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Scenariusz</title><style>body {font-family: Arial; font-size: 11pt;} h1 {font-size: 18pt; color: #059669;} h2 {font-size: 14pt; border-bottom: 2px solid #059669; padding-bottom: 5px; margin-top: 20px;} .details {margin-bottom: 15px;}</style></head><body>`;
+                const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Scenariusz</title><style>body {font-family: Arial; font-size: 11pt;} h1 {font-size: 18pt; color: #059669;} h2 {font-size: 14pt; border-bottom: 2px solid #059669; padding-bottom: 5px; margin-top: 20px;} b {color: #1e293b;}</style></head><body>`;
                 const footer = `</body></html>`;
                 const blob = new Blob(['\ufeff', header + content + footer], { type: 'application/msword' });
                 const url = URL.createObjectURL(blob);
@@ -188,21 +190,21 @@
                         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex flex-col items-center justify-center text-white text-center p-6">
                             <div className="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center space-y-6 max-w-sm text-slate-800">
                                 <div className="w-20 h-20 border-8 border-emerald-100 border-t-emerald-600 rounded-full animate-spin"></div>
-                                <h3 className="text-xl font-black">Asystent AI pracuje...</h3>
-                                <p className="text-sm text-slate-500">Układam metodyczny przebieg zajęć i dzielę fazy na minuty. Proszę o chwilę cierpliwości.</p>
+                                <h3 className="text-xl font-black">AI układa plan zajęć...</h3>
+                                <p className="text-sm text-slate-500 text-center font-medium leading-relaxed">Dopasowuję cele operacyjne i fazy zajęć do Twojego tematu. To zajmie tylko kilka sekund.</p>
                             </div>
                         </div>
                     )}
 
                     <nav className="bg-white border-b px-8 py-4 flex justify-between items-center print-hidden sticky top-0 z-50 shadow-sm">
-                        <div className="flex items-center space-x-3 font-black text-2xl tracking-tight">
+                        <div className="flex items-center space-x-3 font-black text-2xl tracking-tight text-slate-800">
                             <div className="bg-emerald-600 p-2.5 rounded-xl text-white shadow-lg"><Icon name="FileText" size={24}/></div>
-                            <span className="text-slate-800">Scenariusz<span className="text-emerald-600">AI</span> <span className="text-[10px] text-emerald-700 ml-1 font-bold bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200 uppercase tracking-widest">v15.0 Kombajn PRO</span></span>
+                            <span>EduBox<span className="text-emerald-600">AI</span> <span className="text-[10px] text-emerald-700 ml-1 font-bold bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200">KOMBAJN PRO v2</span></span>
                         </div>
                         <div className="flex items-center space-x-4">
                             {!isPremium && (
                                 <div className="flex items-center space-x-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
-                                    <input value={accessCode} onChange={e => setAccessCode(e.target.value)} placeholder="Kod Premium..." className="p-2 bg-transparent text-sm w-32 outline-none font-medium text-slate-600"/>
+                                    <input value={accessCode} onChange={e => setAccessCode(e.target.value)} placeholder="Kod Premium..." className="p-2 bg-transparent text-sm w-32 outline-none font-medium"/>
                                     <button onClick={handleVerifyCode} className="p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"><Icon name="Sparkles" size={16}/></button>
                                 </div>
                             )}
@@ -214,29 +216,55 @@
 
                     <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full print:block print:p-0">
                         
-                        {/* PANEL FORMULARZA */}
+                        {/* PANEL KONFIGURACJI */}
                         <div className="lg:col-span-4 space-y-6 print-hidden">
-                            
                             <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-5">
                                 <h2 className="font-bold flex items-center text-slate-800 text-sm uppercase tracking-widest border-b pb-4"><Icon name="Settings" className="mr-2 text-emerald-500"/> Konfiguracja</h2>
                                 
                                 <div className="space-y-4">
                                     <div>
                                         <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Temat lekcji</label>
-                                        <input type="text" value={params.topic} onChange={e => setParams({...params, topic: e.target.value})} placeholder="np. Wiosna budzi się do życia..." className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-500 transition-all font-semibold" />
+                                        <input type="text" value={params.topic} onChange={e => setParams({...params, topic: e.target.value})} placeholder="np. Dbamy o naszą Ziemię..." className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-500 transition-all font-semibold" />
                                     </div>
+                                    
                                     <div className="grid grid-cols-2 gap-3">
                                         <div>
-                                            <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Wiek</label>
+                                            <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Wiek / Grupa</label>
                                             <select value={params.age} onChange={e => setParams({...params, age: e.target.value})} className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"><option>3-4 latki</option><option>5-6 latki</option><option>Klasy I-III</option><option>Klasy IV-VIII</option></select>
                                         </div>
                                         <div>
-                                            <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Format</label>
-                                            <select value={params.formatType} onChange={e => setParams({...params, formatType: e.target.value})} className="w-full mt-1 p-3 bg-emerald-50 border border-emerald-100 rounded-xl outline-none font-bold text-emerald-700">
-                                                <option value="detailed">📜 Lista punktowa</option>
-                                                <option value="concise">📝 Forma akapitu</option>
+                                            <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Czas trwania</label>
+                                            <select value={params.duration} onChange={e => setParams({...params, duration: e.target.value})} className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"><option>15-20 min</option><option>30-40 min</option><option>45-50 min</option><option>90 min</option></select>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Dominująca metoda</label>
+                                            <select value={params.methods} onChange={e => setParams({...params, methods: e.target.value})} className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                                                <option>Aktywizująca i ruchowa</option>
+                                                <option>Pokazowa / Obrazowa</option>
+                                                <option>Metoda projektowa</option>
+                                                <option>Praktyczne działanie</option>
+                                                <option>Podająca (opowiadanie)</option>
                                             </select>
                                         </div>
+                                        <div>
+                                            <label className="text-[10px] font-bold text-emerald-600 uppercase ml-1">Format Scenariusza</label>
+                                            <select value={params.formatType} onChange={e => setParams({...params, formatType: e.target.value})} className="w-full mt-1 p-3 bg-emerald-50 border border-emerald-100 rounded-xl outline-none font-bold text-emerald-700">
+                                                <option value="detailed">📜 Lista (Punkty)</option>
+                                                <option value="concise">📝 Tekst (Akapity)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Dostosowanie (IPET/SPE)</label>
+                                        <input type="text" value={params.needs} onChange={e => setParams({...params, needs: e.target.value})} placeholder="np. ADHD, Zespół Aspergera..." className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm" />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Twój cel opcjonalny</label>
+                                        <textarea value={params.customGoal} onChange={e => setParams({...params, customGoal: e.target.value})} placeholder="Np. kształtowanie umiejętności współpracy..." className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm h-16 resize-none" />
                                     </div>
                                 </div>
 
@@ -247,10 +275,10 @@
                             </div>
 
                             <div className="bg-indigo-50 p-6 rounded-3xl border border-indigo-100 space-y-4">
-                                <h2 className="font-bold flex items-center text-indigo-900 text-xs uppercase tracking-widest"><Icon name="Layout" className="mr-2 text-indigo-500" size={16}/> Przykładowe wzorce</h2>
+                                <h2 className="font-bold flex items-center text-indigo-900 text-xs uppercase tracking-widest"><Icon name="Layout" className="mr-2 text-indigo-500" size={16}/> Szybkie Przykłady</h2>
                                 <div className="grid grid-cols-1 gap-2">
-                                    <button onClick={() => loadSample('wiosna')} className="p-3 bg-white hover:bg-indigo-100 rounded-xl text-left text-xs font-bold text-indigo-800 transition-colors shadow-sm flex items-center gap-2 border border-indigo-100">🌷 Wiosna budzi się (Szczegółowy)</button>
-                                    <button onClick={() => loadSample('ziemia')} className="p-3 bg-white hover:bg-indigo-100 rounded-xl text-left text-xs font-bold text-indigo-800 transition-colors shadow-sm flex items-center gap-2 border border-indigo-100">🌍 Dzień Ziemi (Szczegółowy)</button>
+                                    <button onClick={() => loadSample('wiosna')} className="p-3 bg-white hover:bg-indigo-100 rounded-xl text-left text-xs font-bold text-indigo-800 transition-colors shadow-sm flex items-center gap-2 border border-indigo-100">🌷 Wiosna budzi się</button>
+                                    <button onClick={() => loadSample('ziemia')} className="p-3 bg-white hover:bg-indigo-100 rounded-xl text-left text-xs font-bold text-indigo-800 transition-colors shadow-sm flex items-center gap-2 border border-indigo-100">🌍 Dzień Ziemi</button>
                                 </div>
                             </div>
 
@@ -259,78 +287,102 @@
                                     <Icon name="Printer" size={20} /><span>DRUKUJ DO PDF</span>
                                 </button>
                                 <button onClick={exportToWord} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold flex items-center justify-center space-x-3 transition-colors shadow-md">
-                                    <Icon name="Download" size={20} /><span>POBIERZ .DOCX (WORD)</span>
+                                    <Icon name="Download" size={20} /><span>EKSPORT DO WORD (.DOC)</span>
                                 </button>
                             </div>
                         </div>
 
-                        {/* ARKUSZ PODGLĄDU (A4) */}
+                        {/* PODGLĄD SCENARIUSZA */}
                         <div className="lg:col-span-8 flex justify-center items-start overflow-x-auto pb-10">
                             <div id="scenario-container" className="bg-white w-full max-w-[210mm] min-h-[297mm] shadow-2xl p-12 md:p-16 scenario-page text-slate-900 relative">
                                 
                                 <div className="border-b-4 border-emerald-600 pb-8 mb-10">
                                     <div className="flex justify-between items-start text-[10px] text-slate-400 uppercase font-bold mb-8">
-                                        <div>Data: ................................</div>
-                                        <div>Prowadzący: ................................</div>
+                                        <div className="space-y-1">
+                                            <div>Data: ................................</div>
+                                            <div>Prowadzący: ................................</div>
+                                        </div>
+                                        <div className="text-right">Placówka: ................................</div>
                                     </div>
-                                    <div className="text-xs font-bold text-emerald-600 uppercase mb-1 tracking-widest">Scenariusz zajęć dydaktycznych</div>
-                                    <h1 className="text-3xl md:text-4xl font-black text-slate-800 leading-tight mb-6 uppercase">{scenario?.title}</h1>
-                                    <div className="flex flex-wrap gap-4 text-sm font-semibold">
-                                        <span className="bg-slate-100 px-4 py-2 rounded-lg text-slate-600">Czas: {scenario?.duration}</span>
-                                        <span className="bg-slate-100 px-4 py-2 rounded-lg text-slate-600">Grupa: {scenario?.group}</span>
+                                    <h1 className="text-3xl md:text-4xl font-black text-slate-800 leading-tight mb-8 uppercase tracking-tight">{scenario?.title}</h1>
+                                    
+                                    <div className="grid grid-cols-2 gap-4 border-t border-b border-slate-100 py-4">
+                                        <div className="text-sm font-bold text-slate-500 uppercase tracking-wider flex flex-col">
+                                            <span>Wiek / Grupa:</span>
+                                            <span className="text-emerald-700 text-base">{scenario?.group}</span>
+                                        </div>
+                                        <div className="text-sm font-bold text-slate-500 uppercase tracking-wider flex flex-col">
+                                            <span>Czas trwania:</span>
+                                            <span className="text-emerald-700 text-base">{scenario?.duration}</span>
+                                        </div>
+                                        <div className="text-sm font-bold text-slate-500 uppercase tracking-wider flex flex-col col-span-2">
+                                            <span>Dominująca metoda pracy:</span>
+                                            <span className="text-emerald-700 text-base">{scenario?.methods || params.methods}</span>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <div className="space-y-10">
                                     <section>
-                                        <h2 className="text-lg font-black text-emerald-700 uppercase border-l-4 border-emerald-500 pl-4 mb-4">I. Cele zajęć</h2>
-                                        <div className="pl-5 whitespace-pre-wrap text-slate-700">{scenario?.main_goal}</div>
+                                        <h2 className="text-lg font-black text-emerald-700 uppercase border-l-4 border-emerald-500 pl-4 mb-4 italic">I. Cele i założenia</h2>
+                                        <div className="pl-5 space-y-4">
+                                            <div>
+                                                <h4 className="font-bold text-slate-800 text-sm mb-1 uppercase tracking-tighter">Cele zajęć:</h4>
+                                                <div className="whitespace-pre-wrap text-slate-700 text-sm leading-relaxed">{scenario?.main_goal}</div>
+                                            </div>
+                                            {(scenario?.custom_goal || params.customGoal) && (
+                                                <div className="bg-emerald-50/50 p-3 rounded-xl border border-emerald-100">
+                                                    <h4 className="font-bold text-emerald-800 text-xs mb-1 uppercase">Cel dodatkowy nauczyciela:</h4>
+                                                    <div className="text-emerald-900 text-sm italic">{scenario?.custom_goal || params.customGoal}</div>
+                                                </div>
+                                            )}
+                                        </div>
                                     </section>
 
                                     <section>
-                                        <h2 className="text-lg font-black text-emerald-700 uppercase border-l-4 border-emerald-500 pl-4 mb-6">II. Przebieg zajęć</h2>
+                                        <h2 className="text-lg font-black text-emerald-700 uppercase border-l-4 border-emerald-500 pl-4 mb-6 italic">II. Przebieg zajęć</h2>
                                         <div className="space-y-8 pl-2">
                                             {scenario?.phases?.map((phase, idx) => (
                                                 <div key={idx} className="relative border-l-2 border-emerald-200 pl-6 pb-2 page-break-inside-avoid">
                                                     <div className="absolute -left-[9px] top-1 w-4 h-4 bg-white border-2 border-emerald-500 rounded-full shadow-sm"></div>
                                                     <div className="flex justify-between items-baseline mb-2 flex-wrap gap-2">
                                                         <h3 className="font-bold text-slate-800 text-base">{phase?.step_name}</h3>
-                                                        <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full uppercase">{phase?.time}</span>
+                                                        <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-tighter shadow-sm">{phase?.time}</span>
                                                     </div>
-                                                    <div className="whitespace-pre-wrap text-slate-600 text-[14px] leading-relaxed italic">{phase?.details}</div>
+                                                    <div className="whitespace-pre-wrap text-slate-600 text-sm leading-relaxed">{phase?.details}</div>
                                                 </div>
                                             ))}
                                         </div>
                                     </section>
 
-                                    <section className="bg-slate-50 rounded-2xl p-6 border border-slate-200 page-break-inside-avoid">
-                                        <h2 className="text-sm font-bold text-slate-800 uppercase flex items-center mb-6 border-b border-slate-200 pb-3">
-                                            <Icon name="CheckCircle" size={18} className="mr-2 text-emerald-500" /> Wskazówki i środki dydaktyczne
+                                    <section className="bg-slate-50 rounded-3xl p-8 border border-slate-200 page-break-inside-avoid shadow-inner">
+                                        <h2 className="text-sm font-bold text-slate-800 uppercase flex items-center mb-8 border-b border-slate-200 pb-3">
+                                            <Icon name="Settings" size={18} className="mr-2 text-slate-500" /> Uwagi metodyczne i środki
                                         </h2>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                             <div className="col-span-full">
-                                                <h4 className="font-bold text-slate-700 mb-2 text-xs uppercase tracking-wider">Potrzebne materiały:</h4>
+                                                <h4 className="font-bold text-slate-700 mb-2 text-xs uppercase tracking-widest flex items-center"><Icon name="CheckCircle" size={14} className="mr-2 text-emerald-500"/> Materiały i pomoce:</h4>
                                                 <div className="flex flex-wrap gap-2">
-                                                    {scenario?.materials?.map((m, i) => <span key={i} className="bg-white border border-slate-200 px-3 py-1 rounded-md text-xs italic text-slate-500 shadow-sm">{m}</span>)}
+                                                    {scenario?.materials?.map((m, i) => <span key={i} className="bg-white border border-slate-200 px-3 py-1.5 rounded-xl text-xs italic text-slate-500 shadow-sm">{m}</span>)}
                                                 </div>
                                             </div>
                                             <div>
-                                                <h4 className="font-bold text-slate-700 mb-1 text-xs uppercase tracking-wider">Integracja:</h4>
-                                                <p className="text-xs text-slate-600">{scenario?.integration}</p>
+                                                <h4 className="font-bold text-slate-700 mb-1 text-xs uppercase tracking-widest">Integracja treści:</h4>
+                                                <p className="text-xs text-slate-600 leading-relaxed">{scenario?.integration}</p>
                                             </div>
                                             <div>
-                                                <h4 className="font-bold text-slate-700 mb-1 text-xs uppercase tracking-wider">Pogoda:</h4>
-                                                <p className="text-xs text-slate-600">{scenario?.weather_alternative}</p>
+                                                <h4 className="font-bold text-slate-700 mb-1 text-xs uppercase tracking-widest">Wersja alternatywna:</h4>
+                                                <p className="text-xs text-slate-600 leading-relaxed">{scenario?.weather_alternative}</p>
                                             </div>
-                                            <div className="col-span-full bg-amber-50 p-4 rounded-xl border border-amber-100">
-                                                <h4 className="font-bold text-amber-800 mb-1 text-xs uppercase tracking-wider">Dostosowanie (SPE):</h4>
-                                                <p className="text-xs text-amber-900 leading-relaxed italic">{scenario?.adjustments}</p>
+                                            <div className="col-span-full bg-amber-50 p-5 rounded-2xl border border-amber-100 shadow-sm">
+                                                <h4 className="font-bold text-amber-800 mb-2 text-xs uppercase tracking-widest">Dostosowanie (IPET / SPE / WOPFU):</h4>
+                                                <p className="text-xs text-amber-900 leading-relaxed italic font-medium">{scenario?.adjustments || params.needs}</p>
                                             </div>
                                         </div>
                                     </section>
                                 </div>
 
-                                <div className="mt-20 pt-8 border-t border-slate-100 text-center opacity-30 text-[9px] font-bold uppercase tracking-[8px]">
+                                <div className="mt-20 pt-8 border-t border-slate-100 text-center opacity-30 text-[9px] font-bold uppercase tracking-[10px]">
                                     Generator EduBox AI PRO
                                 </div>
                             </div>
