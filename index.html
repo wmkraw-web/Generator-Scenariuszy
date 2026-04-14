@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generator Scenariuszy AI PRO - EduBox AI</title>
-    <!-- Biblioteki -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -13,24 +12,12 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Lora:ital,wght@0,400;0,700;1,400&display=swap');
         
         body { background-color: #f1f5f9; font-family: 'Inter', sans-serif; }
-        
-        .scenario-page {
-            font-family: 'Lora', serif;
-            line-height: 1.6;
-            color: #1e293b;
-        }
+        .scenario-page { font-family: 'Lora', serif; line-height: 1.6; color: #1e293b; }
 
         @media print {
             body { background: white; }
             .print-hidden { display: none !important; }
-            #scenario-container {
-                border: none !important;
-                box-shadow: none !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                width: 100% !important;
-                max-width: 100% !important;
-            }
+            #scenario-container { border: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
             .page-break { page-break-before: always; }
             body, html { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
@@ -38,6 +25,10 @@
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        /* Styl dla szklanych paneli (szybek) */
+        .glass-panel-gray { background: rgba(248, 250, 252, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(226, 232, 240, 0.8); }
+        .glass-panel-yellow { background: rgba(255, 251, 235, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(253, 230, 138, 0.8); }
     </style>
 </head>
 <body>
@@ -46,44 +37,9 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // --- PRZYKŁADOWE DANE ---
         const SAMPLES = {
-            wiosna: {
-                title: "Wiosna budzi się do życia",
-                duration: "45-50 minut",
-                group: "18-22 dzieci, wiek 5-6 lat",
-                methods: "Aktywizująca (taniec, drama, kolaż)",
-                main_goal: "Rozwijanie wrażliwości na zmiany w przyrodzie, ćwiczenie mowy, ruchowej koordynacji oraz pracy w grupie.",
-                custom_goal: "Kształtowanie umiejętności uważnej obserwacji otoczenia.",
-                phases: [
-                    { step_name: "1. Powitanie i krąg poranny", time: "5-6 min", details: "- Dzieci siadają w kręgu na dywanie.\n- Piosenka powitalna: „Dzień dobry, witaj w naszym kręgu”.\n- Zabawa „Co zmieniło się na dworze?”: Pytania o kwiaty, ptaki i słońce." },
-                    { step_name: "2. Rozgrzewka ruchowa", time: "6-7 min", details: "- Piosenka: „Wiosna tańczy”.\n- Ruchy: „Drzewa rosną”, „Ptaki fruwają”, „Deszczyk pada”, „Motylki latają”." },
-                    { step_name: "3. Część główna - Wiosenny ogród", time: "20-22 min", details: "A. Czytanie: Krótka bajka o przebudzeniu wiosny.\nB. Zabawa dramatyczna „Budzimy przyrodę”: Podział na grupy (drzewa, kwiatki, ptaki, owady).\nC. Praca plastyczna „Mój wiosenny obrazek”: Technika kolażu i rysowania." },
-                    { step_name: "4. Podsumowanie i refleksja", time: "5-6 min", details: "- Prezentacja prac w kręgu.\n- Wypowiedzi dzieci: „W moim ogrodzie rosną...”.\n- Wspólna piosenka na zakończenie." }
-                ],
-                materials: ["Duże kartki A3/A2", "Wycinanki", "Klej", "Kredki", "Odtwarzacz muzyki"],
-                integration: "Język (bogacenie słownictwa), Matematyka (liczenie kwiatków), Przyroda (obserwacja gałązek).",
-                weather_alternative: "Wersja na deszczowy dzień: kącik sensoryczny (ziarna, ziemia, woda, sztuczne kwiaty).",
-                adjustments: "Dla dzieci z mniejszą koncentracją skrócić część plastyczną, wydłużyć ruchową."
-            },
-            ziemia: {
-                title: "Dbamy o naszą Ziemię – jesteśmy jej przyjaciółmi",
-                duration: "45-50 minut",
-                group: "18-22 dzieci, wiek 5-6 lat",
-                methods: "Metoda projektowa, pokazowa, praktyczne działanie",
-                main_goal: "Kształtowanie postaw proekologicznych, zrozumienie segregacji śmieci, oszczędzania wody i energii.",
-                custom_goal: "Uświadomienie dzieciom wpływu jednostki na stan całej planety.",
-                phases: [
-                    { step_name: "1. Powitanie i krąg poranny", time: "5-6 min", details: "- Powitanie piosenką: „Dzień dobry, Ziemio zielona”.\n- Rozmowa o Dniu Ziemi przy globusie.\n- Zabawa „Prawda czy fałsz?” (zasady ekologii)." },
-                    { step_name: "2. Rozgrzewka ruchowa", time: "6-7 min", details: "- „Podróż rakietą wokół Ziemi”.\n- Ruchy: Start rakiety, lot w kosmosie, sprzątanie planety, sadzenie drzew." },
-                    { step_name: "3. Część główna - Jak pomóc Ziemi?", time: "22-25 min", details: "A. Opowiadanie o „Chorej Planetce”.\nB. Zabawa dydaktyczna „Segregujemy śmieci”: sortowanie do kolorowych koszy.\nC. Praca plastyczna z recyklingu: „Moja szczęśliwa Ziemia” (kolaż z nakrętek i gazet)." },
-                    { step_name: "4. Podsumowanie i hasło", time: "5-6 min", details: "- Każdy kończy zdanie: „Jestem przyjacielem Ziemi, bo...”.\n- Wspólne hasło: „Dbam o Ziemię każdego dnia!”." }
-                ],
-                materials: ["Globus", "Kolorowe kosze", "Materiały z recyklingu", "Farby", "Wiersze ekologiczne"],
-                integration: "Przyroda (ekologia), Matematyka (porównywanie ilości śmieci), Sensoryka (eksperyment Ziemia w słoiku).",
-                weather_alternative: "Spacer po terenie przedszkola i wspólne sprzątanie (w rękawiczkach).",
-                adjustments: "Dodanie gry memory z symbolami recyklingu dla dzieci bardziej zaawansowanych."
-            }
+            wiosna: { title: "Wiosna budzi się do życia", duration: "45-50 minut", group: "18-22 dzieci, wiek 5-6 lat", methods: "Aktywizująca (taniec, drama, kolaż)", main_goal: "Rozwijanie wrażliwości na zmiany w przyrodzie oraz integracja grupy.", custom_goal: "Kształtowanie umiejętności uważnej obserwacji otoczenia.", phases: [ { step_name: "1. Powitanie i krąg poranny", time: "5-6 min", details: "- Dzieci siadają w kręgu na dywanie.\n- Śpiewamy piosenkę powitalną z elementami pokazywania." }, { step_name: "2. Burza mózgów", time: "10 min", details: "- Zadawanie pytań: Po czym poznajemy wiosnę?\n- Prezentacja ilustracji wiosennych kwiatów." } ], materials: ["Kredki", "Szary papier", "Ilustracje kwiatów", "Głośnik bluetooth"], integration: "Język, Przyroda, Muzyka", weather_alternative: "Jeśli pada deszcz, zamiast spaceru robimy wiosenny kącik sensoryczny w sali z zebranych wcześniej liści i mchu.", adjustments: "Dla Jasia (Spektrum autyzmu): Zapewnienie słuchawek wyciszających podczas głośniejszej piosenki powitalnej. Wcześniejsze uprzedzenie o zmianie aktywności. Jasne i krótkie komunikaty." },
+            ziemia: { title: "Dbamy o naszą Ziemię", duration: "45-50 minut", group: "18-22 dzieci, wiek 5-6 lat", methods: "Metoda projektowa, Praktyczne działanie", main_goal: "Kształtowanie podstawowych postaw proekologicznych.", custom_goal: "Uświadomienie dzieciom, jaki wpływ na środowisko ma pojedynczy człowiek.", phases: [ { step_name: "1. Powitanie", time: "5 min", details: "- Piosenka 'Ziemio zielona'." }, { step_name: "2. Segregacja Śmieci - Zabawa", time: "15 min", details: "- Rozsypanie 'czystych' śmieci (kartony, plastikowe butelki) na środku dywanu.\n- Dzieci mają za zadanie wrzucić je do odpowiednich, kolorowych pojemników." } ], materials: ["Globus", "Kolorowe pojemniki", "Czyste opakowania po produktach"], integration: "Przyroda, Matematyka (liczenie wrzuconych elementów)", weather_alternative: "Zabawa ruchowa 'Jestem roślinką' przy muzyce relaksacyjnej zamiast wyjścia do ogrodu.", adjustments: "Dla dzieci z nadpobudliwością (ADHD): Przydzielenie konkretnej, fizycznej roli podczas segregacji śmieci (tzw. 'Kierownik pojemnika niebieskiego'), aby ukierunkować energię na zadanie." }
         };
 
         const Icon = ({ name, size = 20, className = "" }) => {
@@ -93,46 +49,46 @@
                 Printer: <path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/>,
                 Coffee: <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8zM7 2v3M11 2v3M15 2v3"/>,
                 Settings: <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>,
-                Clock: (<><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>),
-                CheckCircle: (<><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>),
-                User: (<><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></>),
                 Download: <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>,
-                Layout: (<><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></>)
+                Wand2: <path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.21 1.21 0 0 0 1.72 0L21.64 5.36a1.21 1.21 0 0 0 0-1.72ZM14 7l3 3M5 6v1M19 2v1M10 2v2M7 10H6M22 9h-2M15 2h1"/>
             };
-            return (
-                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-                    {icons[name] || null}
-                </svg>
-            );
+            return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{icons[name]}</svg>;
         };
 
         function App() {
             const [isPremium, setIsPremium] = useState(false);
             const [accessCode, setAccessCode] = useState('');
             const [isGenerating, setIsGenerating] = useState(false);
+            
+            const [botQuickPrompt, setBotQuickPrompt] = useState('');
+            const [botStatus, setBotStatus] = useState('');
 
             const [params, setParams] = useState({
                 topic: '',
                 age: '5-6 latki',
                 duration: '45-50 min',
                 methods: 'Aktywizująca i ruchowa',
-                needs: 'Standardowa grupa',
+                needs: '',
                 formatType: 'detailed',
-                customGoal: ''
+                customGoal: '' // Powrót brakującego pola celu!
             });
 
+            // Scenariusz z widocznymi "szybkami" od samego startu!
             const [scenario, setScenario] = useState({
-                title: 'Temat Zajęć',
-                duration: '45 min',
-                group: '5-6 lat',
-                methods: 'Wybierz parametry...',
-                main_goal: 'Wpisz temat, aby wygenerować scenariusz...',
-                custom_goal: '',
-                phases: [],
-                materials: [],
-                integration: '',
-                weather_alternative: '',
-                adjustments: ''
+                title: 'Szablon Scenariusza', 
+                duration: 'Wybierz...', 
+                group: 'Wybierz grupę', 
+                methods: 'Wybierz z listy...', 
+                main_goal: 'Tutaj sztuczna inteligencja wygeneruje profesjonalny cel główny zajęć na podstawie tematu.', 
+                custom_goal: 'Tutaj pojawi się Twój cel opcjonalny.', 
+                phases: [
+                    { step_name: "1. Faza Wstępna", time: "5 min", details: "Szczegóły powitania i wprowadzenia do tematu..." },
+                    { step_name: "2. Faza Główna", time: "25 min", details: "Zabawy i realizacja tematu..." }
+                ], 
+                materials: ['Tutaj pojawią się potrzebne materiały'], 
+                integration: 'AI wskaże powiązania z podstawą programową...', 
+                weather_alternative: 'Alternatywa na niepogodę...', 
+                adjustments: 'Tutaj pojawią się profesjonalne wskazówki do pracy z dziećmi z orzeczeniami (np. autyzm, ADHD) w ramach IPET.'
             });
 
             const handleVerifyCode = () => {
@@ -142,20 +98,60 @@
 
             const loadSample = (key) => setScenario(SAMPLES[key]);
 
+            const handleBotAutoFill = () => {
+                if(!botQuickPrompt.trim()) return;
+                
+                const text = botQuickPrompt.toLowerCase();
+                let newParams = { ...params };
+                let extractedTopic = botQuickPrompt;
+
+                if (text.includes('3 lat') || text.includes('4 lat') || text.includes('3-4')) newParams.age = '3-4 latki';
+                else if (text.includes('5 lat') || text.includes('6 lat') || text.includes('5-6')) newParams.age = '5-6 latki';
+                else if (text.includes('klasa 1') || text.includes('klasa 2') || text.includes('klasa 3') || text.includes('klas i')) newParams.age = 'Klasy I-III';
+                else if (text.includes('klasa 4') || text.includes('starsz')) newParams.age = 'Klasy IV-VIII';
+
+                if (text.includes('15') || text.includes('20')) newParams.duration = '15-20 min';
+                else if (text.includes('30') || text.includes('40')) newParams.duration = '30-40 min';
+                else if (text.includes('90') || text.includes('półtorej')) newParams.duration = '90 min';
+                else newParams.duration = '45-50 min';
+
+                if (text.includes('ruch') || text.includes('zabaw') || text.includes('aktyw')) newParams.methods = 'Aktywizująca i ruchowa';
+                else if (text.includes('pokaz') || text.includes('ogląd') || text.includes('obraz')) newParams.methods = 'Pokazowa / Obrazowa';
+                else if (text.includes('projekt') || text.includes('badacz')) newParams.methods = 'Metoda projektowa';
+                else if (text.includes('praktycz') || text.includes('doświadcz') || text.includes('eksperyment')) newParams.methods = 'Praktyczne działanie';
+                else if (text.includes('opowiad') || text.includes('czyt')) newParams.methods = 'Podająca (opowiadanie)';
+
+                if (text.includes('autyzm') || text.includes('asperger')) newParams.needs = 'Spektrum autyzmu';
+                if (text.includes('adhd') || text.includes('nadpobudli')) newParams.needs = 'ADHD (Nadpobudliwość)';
+
+                extractedTopic = extractedTopic.replace(/dla\s*\d+\s*lat[a-ząćęłńóśźż]*/gi, '')
+                                               .replace(/dla\s*(dzieci|klas|uczniów)\s*[a-z0-9-]*/gi, '')
+                                               .replace(/(przez\s*|na\s*)?\d+\s*min[a-ząćęłńóśźż]*/gi, '')
+                                               .replace(/metod[a-ząćęłńóśźż]*\s*[a-ząćęłńóśźż]+/gi, '')
+                                               .replace(/[,.]/g, '')
+                                               .replace(/\s+/g, ' ')
+                                               .trim();
+                
+                newParams.topic = extractedTopic || 'Zajęcia ogólne';
+
+                setParams(newParams);
+                setBotQuickPrompt('');
+                setBotStatus('Sukces! Rubryki poniżej zostały wypełnione. Możesz kliknąć "Wygeneruj"!');
+                setTimeout(() => setBotStatus(''), 5000);
+            };
+
             const generateScenario = async () => {
                 if (!params.topic.trim()) return alert('Wpisz temat zajęć!');
                 setIsGenerating(true);
                 
-                const systemPrompt = `Jesteś wybitnym metodykiem edukacji przedszkolnej i wczesnoszkolnej w Polsce. Zawsze odpowiadaj WYŁĄCZNIE formatem JSON.
-                Struktura: { "title": "...", "duration": "...", "group": "...", "methods": "...", "main_goal": "...", "custom_goal": "...", "phases": [{ "step_name": "...", "time": "...", "details": "..." }], "materials": ["..."], "integration": "...", "weather_alternative": "...", "adjustments": "..." }
-                Zasada FORMATU: Jeśli wybrano format "detailed", w polu "details" KAŻDY punkt musi zaczynać się od myślnika i nowej linii (\\n).`;
+                const systemPrompt = `Jesteś wybitnym metodykiem edukacji przedszkolnej. Odpowiadaj WYŁĄCZNIE formatem JSON.
+                Struktura: { "title": "...", "duration": "...", "group": "...", "methods": "...", "main_goal": "...", "custom_goal": "...", "phases": [{ "step_name": "...", "time": "...", "details": "..." }], "materials": ["..."], "integration": "...", "weather_alternative": "...", "adjustments": "..." }`;
 
-                const userPrompt = `Temat: ${params.topic}. Grupa: ${params.age}. Czas: ${params.duration}. Metoda: ${params.methods}. Potrzeby: ${params.needs}. Cel nauczyciela: ${params.customGoal}. Formatowanie: ${params.formatType === 'detailed' ? 'lista punktowa krok po kroku' : 'zwięzłe opisy akapitowe'}.`;
+                const userPrompt = `Temat: ${params.topic}. Grupa: ${params.age}. Czas: ${params.duration}. Metoda: ${params.methods}. Potrzeby: ${params.needs}. Cel nauczyciela: ${params.customGoal}.`;
 
                 try {
                     const res = await fetch('/api/chat', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ prompt: userPrompt, system: systemPrompt })
                     });
                     const data = await res.json();
@@ -164,11 +160,8 @@
                     const end = text.lastIndexOf('}');
                     setScenario(JSON.parse(text.substring(start, end + 1)));
                 } catch (error) {
-                    console.error(error);
-                    alert("Błąd serwera. Spróbuj jeszcze raz.");
-                } finally {
-                    setIsGenerating(false);
-                }
+                    console.error(error); alert("Błąd serwera.");
+                } finally { setIsGenerating(false); }
             };
 
             const exportToWord = () => {
@@ -176,215 +169,175 @@
                 const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Scenariusz</title><style>body {font-family: Arial; font-size: 11pt;} h1 {font-size: 18pt; color: #059669;} h2 {font-size: 14pt; border-bottom: 2px solid #059669; padding-bottom: 5px; margin-top: 20px;} b {color: #1e293b;}</style></head><body>`;
                 const footer = `</body></html>`;
                 const blob = new Blob(['\ufeff', header + content + footer], { type: 'application/msword' });
-                const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
-                link.href = url;
+                link.href = URL.createObjectURL(blob);
                 link.download = `scenariusz_${scenario.title.replace(/\s+/g, '_')}.doc`;
                 link.click();
             };
 
             return (
                 <div className="min-h-screen flex flex-col relative">
-                    
                     {isGenerating && (
-                        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex flex-col items-center justify-center text-white text-center p-6">
-                            <div className="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center space-y-6 max-w-sm text-slate-800">
-                                <div className="w-20 h-20 border-8 border-emerald-100 border-t-emerald-600 rounded-full animate-spin"></div>
+                        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex flex-col items-center justify-center text-white">
+                            <div className="bg-white p-8 rounded-3xl flex flex-col items-center space-y-4 max-w-sm text-slate-800">
+                                <div className="w-16 h-16 border-8 border-emerald-100 border-t-emerald-600 rounded-full animate-spin"></div>
                                 <h3 className="text-xl font-black">AI układa plan zajęć...</h3>
-                                <p className="text-sm text-slate-500 text-center font-medium leading-relaxed">Dopasowuję cele operacyjne i fazy zajęć do Twojego tematu. To zajmie tylko kilka sekund.</p>
                             </div>
                         </div>
                     )}
 
                     <nav className="bg-white border-b px-8 py-4 flex justify-between items-center print-hidden sticky top-0 z-50 shadow-sm">
                         <div className="flex items-center space-x-3 font-black text-2xl tracking-tight text-slate-800">
-                            <div className="bg-emerald-600 p-2.5 rounded-xl text-white shadow-lg"><Icon name="FileText" size={24}/></div>
-                            <span>EduBox<span className="text-emerald-600">AI</span> <span className="text-[10px] text-emerald-700 ml-1 font-bold bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200">KOMBAJN PRO v2</span></span>
+                            <div className="bg-emerald-600 p-2.5 rounded-xl text-white shadow-lg shadow-emerald-200"><Icon name="FileText" size={24}/></div>
+                            <span>EduBox<span className="text-emerald-600">AI</span></span>
                         </div>
                         <div className="flex items-center space-x-4">
                             {!isPremium && (
                                 <div className="flex items-center space-x-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
                                     <input value={accessCode} onChange={e => setAccessCode(e.target.value)} placeholder="Kod Premium..." className="p-2 bg-transparent text-sm w-32 outline-none font-medium"/>
-                                    <button onClick={handleVerifyCode} className="p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"><Icon name="Sparkles" size={16}/></button>
+                                    <button onClick={handleVerifyCode} className="p-2 bg-emerald-600 text-white rounded-lg"><Icon name="Sparkles" size={16}/></button>
                                 </div>
                             )}
-                            <button onClick={() => window.open('https://buycoffee.to/magiccolor')} className="flex items-center space-x-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-all active:scale-95">
+                            <button onClick={() => window.open('https://buycoffee.to/magiccolor')} className="flex items-center space-x-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-transform active:scale-95 text-sm">
                                 <Icon name="Coffee" size={20} /><span>Postaw Kawę</span>
                             </button>
                         </div>
                     </nav>
 
-                    <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full print:block print:p-0">
+                    <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full print:block print:p-0">
                         
-                        {/* PANEL KONFIGURACJI */}
                         <div className="lg:col-span-4 space-y-6 print-hidden">
-                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-5">
-                                <h2 className="font-bold flex items-center text-slate-800 text-sm uppercase tracking-widest border-b pb-4"><Icon name="Settings" className="mr-2 text-emerald-500"/> Konfiguracja</h2>
+                            
+                            {/* BOTA AUTO-WYPEŁNIACZ (Czysty, profesjonalny wygląd) */}
+                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-4">
+                                <h2 className="font-bold flex items-center text-slate-800 text-sm uppercase tracking-widest border-b pb-4"><Icon name="Wand2" className="mr-2 text-indigo-500"/> Asystent AI (Auto-Wypełnianie)</h2>
+                                <p className="text-[11px] text-slate-500 font-medium">Napisz jedno zdanie, a AI samo ustawi rubryki poniżej (np. "O kosmosie dla 6 latków na 30 minut").</p>
                                 
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Temat lekcji</label>
-                                        <input type="text" value={params.topic} onChange={e => setParams({...params, topic: e.target.value})} placeholder="np. Dbamy o naszą Ziemię..." className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-500 transition-all font-semibold" />
-                                    </div>
-                                    
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div>
-                                            <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Wiek / Grupa</label>
-                                            <select value={params.age} onChange={e => setParams({...params, age: e.target.value})} className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"><option>3-4 latki</option><option>5-6 latki</option><option>Klasy I-III</option><option>Klasy IV-VIII</option></select>
-                                        </div>
-                                        <div>
-                                            <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Czas trwania</label>
-                                            <select value={params.duration} onChange={e => setParams({...params, duration: e.target.value})} className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"><option>15-20 min</option><option>30-40 min</option><option>45-50 min</option><option>90 min</option></select>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div>
-                                            <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Dominująca metoda</label>
-                                            <select value={params.methods} onChange={e => setParams({...params, methods: e.target.value})} className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
-                                                <option>Aktywizująca i ruchowa</option>
-                                                <option>Pokazowa / Obrazowa</option>
-                                                <option>Metoda projektowa</option>
-                                                <option>Praktyczne działanie</option>
-                                                <option>Podająca (opowiadanie)</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="text-[10px] font-bold text-emerald-600 uppercase ml-1">Format Scenariusza</label>
-                                            <select value={params.formatType} onChange={e => setParams({...params, formatType: e.target.value})} className="w-full mt-1 p-3 bg-emerald-50 border border-emerald-100 rounded-xl outline-none font-bold text-emerald-700">
-                                                <option value="detailed">📜 Lista (Punkty)</option>
-                                                <option value="concise">📝 Tekst (Akapity)</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Dostosowanie (IPET/SPE)</label>
-                                        <input type="text" value={params.needs} onChange={e => setParams({...params, needs: e.target.value})} placeholder="np. ADHD, Zespół Aspergera..." className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm" />
-                                    </div>
-                                    <div>
-                                        <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Twój cel opcjonalny</label>
-                                        <textarea value={params.customGoal} onChange={e => setParams({...params, customGoal: e.target.value})} placeholder="Np. kształtowanie umiejętności współpracy..." className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm h-16 resize-none" />
-                                    </div>
+                                <div className="flex bg-slate-50 p-1.5 rounded-xl border border-slate-200 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
+                                    <input 
+                                        type="text" 
+                                        value={botQuickPrompt}
+                                        onChange={(e) => setBotQuickPrompt(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleBotAutoFill()}
+                                        placeholder="Wpisz polecenie..." 
+                                        className="flex-1 bg-transparent px-3 text-sm outline-none font-medium placeholder-slate-400"
+                                    />
+                                    <button onClick={handleBotAutoFill} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-lg transition-colors">
+                                        Wypełnij
+                                    </button>
                                 </div>
-
-                                <button onClick={generateScenario} disabled={isGenerating} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-2xl font-black text-sm tracking-widest flex items-center justify-center space-x-3 shadow-lg transition-all active:scale-95 disabled:bg-slate-300">
-                                    <Icon name="Sparkles" size={20}/>
-                                    <span>WYGENERUJ SCENARIUSZ</span>
-                                </button>
+                                {botStatus && <p className="text-[10px] text-emerald-600 font-bold mt-2 text-center">{botStatus}</p>}
                             </div>
 
-                            <div className="bg-indigo-50 p-6 rounded-3xl border border-indigo-100 space-y-4">
-                                <h2 className="font-bold flex items-center text-indigo-900 text-xs uppercase tracking-widest"><Icon name="Layout" className="mr-2 text-indigo-500" size={16}/> Szybkie Przykłady</h2>
-                                <div className="grid grid-cols-1 gap-2">
-                                    <button onClick={() => loadSample('wiosna')} className="p-3 bg-white hover:bg-indigo-100 rounded-xl text-left text-xs font-bold text-indigo-800 transition-colors shadow-sm flex items-center gap-2 border border-indigo-100">🌷 Wiosna budzi się</button>
-                                    <button onClick={() => loadSample('ziemia')} className="p-3 bg-white hover:bg-indigo-100 rounded-xl text-left text-xs font-bold text-indigo-800 transition-colors shadow-sm flex items-center gap-2 border border-indigo-100">🌍 Dzień Ziemi</button>
+                            {/* POWRÓT ZAKŁADKI Z PRZYKŁADAMI */}
+                            <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 space-y-3">
+                                <h2 className="font-bold flex items-center text-slate-800 text-sm uppercase tracking-widest border-b pb-3"><Icon name="FileText" className="mr-2 text-emerald-500"/> Gotowe Przykłady</h2>
+                                <div className="flex gap-2">
+                                    <button onClick={() => loadSample('wiosna')} className="flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold py-2.5 px-3 rounded-xl transition-colors border border-indigo-100 flex items-center justify-center gap-1">🌸 Wiosna</button>
+                                    <button onClick={() => loadSample('ziemia')} className="flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold py-2.5 px-3 rounded-xl transition-colors border border-emerald-100 flex items-center justify-center gap-1">🌍 Dzień Ziemi</button>
                                 </div>
+                                <p className="text-[10px] text-slate-400 text-center italic mt-1">Kliknij, aby przetestować możliwości układu.</p>
+                            </div>
+
+                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-5">
+                                <h2 className="font-bold flex items-center text-slate-800 text-sm uppercase tracking-widest border-b pb-4"><Icon name="Settings" className="mr-2 text-emerald-500"/> Konfiguracja Ręczna</h2>
+                                <div className="space-y-4">
+                                    <div><label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Temat lekcji</label><input type="text" value={params.topic} onChange={e => setParams({...params, topic: e.target.value})} className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-semibold" /></div>
+                                    
+                                    {/* POWRÓT BRAKUJĄCEGO POLA CELU */}
+                                    <div>
+                                        <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Twój cel (opcjonalnie)</label>
+                                        <input type="text" value={params.customGoal} onChange={e => setParams({...params, customGoal: e.target.value})} placeholder="np. nauka współpracy w grupie" className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 text-sm" />
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div><label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Wiek</label><select value={params.age} onChange={e => setParams({...params, age: e.target.value})} className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"><option>3-4 latki</option><option>5-6 latki</option><option>Klasy I-III</option><option>Klasy IV-VIII</option></select></div>
+                                        <div><label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Czas</label><select value={params.duration} onChange={e => setParams({...params, duration: e.target.value})} className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"><option>15-20 min</option><option>30-40 min</option><option>45-50 min</option><option>90 min</option></select></div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div><label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Metoda</label><select value={params.methods} onChange={e => setParams({...params, methods: e.target.value})} className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"><option>Aktywizująca i ruchowa</option><option>Pokazowa / Obrazowa</option><option>Metoda projektowa</option><option>Praktyczne działanie</option><option>Podająca (opowiadanie)</option></select></div>
+                                        <div><label className="text-[10px] font-bold text-emerald-600 uppercase ml-1">Format</label><select value={params.formatType} onChange={e => setParams({...params, formatType: e.target.value})} className="w-full mt-1 p-3 bg-emerald-50 border-emerald-100 rounded-xl outline-none font-bold text-emerald-700"><option value="detailed">📜 Lista (Punkty)</option><option value="concise">📝 Tekst</option></select></div>
+                                    </div>
+                                    <div><label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Dostosowanie (SPE)</label><input type="text" value={params.needs} onChange={e => setParams({...params, needs: e.target.value})} placeholder="np. dziecko z ADHD" className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm" /></div>
+                                </div>
+                                <button onClick={generateScenario} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-2xl font-black text-sm tracking-widest shadow-lg flex justify-center items-center gap-2 transition-colors"><Icon name="Sparkles" size={20}/> WYGENERUJ SCENARIUSZ</button>
                             </div>
 
                             <div className="grid grid-cols-1 gap-3">
-                                <button onClick={() => window.print()} className="w-full bg-slate-800 hover:bg-slate-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center space-x-3 transition-colors shadow-md">
-                                    <Icon name="Printer" size={20} /><span>DRUKUJ DO PDF</span>
-                                </button>
-                                <button onClick={exportToWord} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold flex items-center justify-center space-x-3 transition-colors shadow-md">
-                                    <Icon name="Download" size={20} /><span>EKSPORT DO WORD (.DOC)</span>
-                                </button>
+                                <button onClick={() => window.print()} className="w-full bg-slate-800 hover:bg-slate-900 text-white py-4 rounded-2xl font-bold flex justify-center items-center gap-2 transition-colors"><Icon name="Printer" size={20}/> DRUKUJ DO PDF</button>
+                                <button onClick={exportToWord} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold flex justify-center items-center gap-2 transition-colors"><Icon name="Download" size={20}/> EKSPORT DO WORD</button>
                             </div>
                         </div>
 
-                        {/* PODGLĄD SCENARIUSZA */}
+                        {/* WIDOK SCENARIUSZA Z PRZYWRÓCONYMI SZYBKAMI */}
                         <div className="lg:col-span-8 flex justify-center items-start overflow-x-auto pb-10">
                             <div id="scenario-container" className="bg-white w-full max-w-[210mm] min-h-[297mm] shadow-2xl p-12 md:p-16 scenario-page text-slate-900 relative">
-                                
                                 <div className="border-b-4 border-emerald-600 pb-8 mb-10">
-                                    <div className="flex justify-between items-start text-[10px] text-slate-400 uppercase font-bold mb-8">
-                                        <div className="space-y-1">
-                                            <div>Data: ................................</div>
-                                            <div>Prowadzący: ................................</div>
-                                        </div>
-                                        <div className="text-right">Placówka: ................................</div>
-                                    </div>
-                                    <h1 className="text-3xl md:text-4xl font-black text-slate-800 leading-tight mb-8 uppercase tracking-tight">{scenario?.title}</h1>
-                                    
+                                    <h1 className="text-3xl md:text-4xl font-black text-slate-800 mb-8 uppercase tracking-tight">{scenario?.title}</h1>
                                     <div className="grid grid-cols-2 gap-4 border-t border-b border-slate-100 py-4">
-                                        <div className="text-sm font-bold text-slate-500 uppercase tracking-wider flex flex-col">
-                                            <span>Wiek / Grupa:</span>
-                                            <span className="text-emerald-700 text-base">{scenario?.group}</span>
-                                        </div>
-                                        <div className="text-sm font-bold text-slate-500 uppercase tracking-wider flex flex-col">
-                                            <span>Czas trwania:</span>
-                                            <span className="text-emerald-700 text-base">{scenario?.duration}</span>
-                                        </div>
-                                        <div className="text-sm font-bold text-slate-500 uppercase tracking-wider flex flex-col col-span-2">
-                                            <span>Dominująca metoda pracy:</span>
-                                            <span className="text-emerald-700 text-base">{scenario?.methods || params.methods}</span>
-                                        </div>
+                                        <div className="text-sm font-bold text-slate-500 uppercase flex flex-col"><span>Wiek / Grupa:</span><span className="text-emerald-700 text-base">{scenario?.group}</span></div>
+                                        <div className="text-sm font-bold text-slate-500 uppercase flex flex-col"><span>Czas trwania:</span><span className="text-emerald-700 text-base">{scenario?.duration}</span></div>
                                     </div>
                                 </div>
-
                                 <div className="space-y-10">
                                     <section>
                                         <h2 className="text-lg font-black text-emerald-700 uppercase border-l-4 border-emerald-500 pl-4 mb-4 italic">I. Cele i założenia</h2>
                                         <div className="pl-5 space-y-4">
-                                            <div>
-                                                <h4 className="font-bold text-slate-800 text-sm mb-1 uppercase tracking-tighter">Cele zajęć:</h4>
-                                                <div className="whitespace-pre-wrap text-slate-700 text-sm leading-relaxed">{scenario?.main_goal}</div>
-                                            </div>
-                                            {(scenario?.custom_goal || params.customGoal) && (
-                                                <div className="bg-emerald-50/50 p-3 rounded-xl border border-emerald-100">
-                                                    <h4 className="font-bold text-emerald-800 text-xs mb-1 uppercase">Cel dodatkowy nauczyciela:</h4>
-                                                    <div className="text-emerald-900 text-sm italic">{scenario?.custom_goal || params.customGoal}</div>
-                                                </div>
-                                            )}
+                                            <div className="whitespace-pre-wrap text-slate-700 text-sm leading-relaxed">{scenario?.main_goal}</div>
+                                            {scenario?.custom_goal && <div className="whitespace-pre-wrap text-slate-700 text-sm leading-relaxed"><span className="font-bold">Cel dodatkowy: </span>{scenario?.custom_goal}</div>}
                                         </div>
                                     </section>
-
+                                    
                                     <section>
                                         <h2 className="text-lg font-black text-emerald-700 uppercase border-l-4 border-emerald-500 pl-4 mb-6 italic">II. Przebieg zajęć</h2>
                                         <div className="space-y-8 pl-2">
                                             {scenario?.phases?.map((phase, idx) => (
-                                                <div key={idx} className="relative border-l-2 border-emerald-200 pl-6 pb-2 page-break-inside-avoid">
-                                                    <div className="absolute -left-[9px] top-1 w-4 h-4 bg-white border-2 border-emerald-500 rounded-full shadow-sm"></div>
-                                                    <div className="flex justify-between items-baseline mb-2 flex-wrap gap-2">
+                                                <div key={idx} className="relative border-l-2 border-emerald-200 pl-6 pb-2">
+                                                    <div className="absolute -left-[9px] top-1 w-4 h-4 bg-white border-2 border-emerald-500 rounded-full"></div>
+                                                    <div className="flex justify-between items-baseline mb-2">
                                                         <h3 className="font-bold text-slate-800 text-base">{phase?.step_name}</h3>
-                                                        <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-tighter shadow-sm">{phase?.time}</span>
+                                                        <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full uppercase">{phase?.time}</span>
                                                     </div>
                                                     <div className="whitespace-pre-wrap text-slate-600 text-sm leading-relaxed">{phase?.details}</div>
                                                 </div>
                                             ))}
                                         </div>
                                     </section>
+                                </div>
 
-                                    <section className="bg-slate-50 rounded-3xl p-8 border border-slate-200 page-break-inside-avoid shadow-inner">
-                                        <h2 className="text-sm font-bold text-slate-800 uppercase flex items-center mb-8 border-b border-slate-200 pb-3">
-                                            <Icon name="Settings" size={18} className="mr-2 text-slate-500" /> Uwagi metodyczne i środki
+                                {/* POWRÓT SZKLANYCH PANELI: UWAGI METODYCZNE I IPET */}
+                                {(scenario?.materials?.length > 0 || scenario?.integration || scenario?.weather_alternative || scenario?.adjustments) && (
+                                    <div className="mt-12 glass-panel-gray rounded-3xl p-8 break-inside-avoid">
+                                        <h2 className="text-base font-black text-slate-800 uppercase mb-5 flex items-center gap-2">
+                                            <Icon name="Settings" size={20} className="text-slate-500" /> Uwagi Metodyczne i Środki
                                         </h2>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                                            <div className="col-span-full">
-                                                <h4 className="font-bold text-slate-700 mb-2 text-xs uppercase tracking-widest flex items-center"><Icon name="CheckCircle" size={14} className="mr-2 text-emerald-500"/> Materiały i pomoce:</h4>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {scenario?.materials?.map((m, i) => <span key={i} className="bg-white border border-slate-200 px-3 py-1.5 rounded-xl text-xs italic text-slate-500 shadow-sm">{m}</span>)}
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-slate-700 mb-1 text-xs uppercase tracking-widest">Integracja treści:</h4>
-                                                <p className="text-xs text-slate-600 leading-relaxed">{scenario?.integration}</p>
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-slate-700 mb-1 text-xs uppercase tracking-widest">Wersja alternatywna:</h4>
-                                                <p className="text-xs text-slate-600 leading-relaxed">{scenario?.weather_alternative}</p>
-                                            </div>
-                                            <div className="col-span-full bg-amber-50 p-5 rounded-2xl border border-amber-100 shadow-sm">
-                                                <h4 className="font-bold text-amber-800 mb-2 text-xs uppercase tracking-widest">Dostosowanie (IPET / SPE / WOPFU):</h4>
-                                                <p className="text-xs text-amber-900 leading-relaxed italic font-medium">{scenario?.adjustments || params.needs}</p>
-                                            </div>
+                                        
+                                        <div className="space-y-3 text-sm text-slate-700 mb-6">
+                                            {scenario?.materials?.length > 0 && (
+                                                <div><span className="font-bold text-slate-900">Materiały i pomoce: </span> {Array.isArray(scenario.materials) ? scenario.materials.join(', ') : scenario.materials}</div>
+                                            )}
+                                            {scenario?.integration && (
+                                                <div><span className="font-bold text-slate-900">Integracja treści: </span> {scenario.integration}</div>
+                                            )}
+                                            {scenario?.weather_alternative && (
+                                                <div><span className="font-bold text-slate-900">Wersja alternatywna (np. niepogoda): </span> {scenario.weather_alternative}</div>
+                                            )}
                                         </div>
-                                    </section>
-                                </div>
 
-                                <div className="mt-20 pt-8 border-t border-slate-100 text-center opacity-30 text-[9px] font-bold uppercase tracking-[10px]">
-                                    Generator EduBox AI PRO
-                                </div>
+                                        {scenario?.adjustments && scenario.adjustments !== "Brak" && (
+                                            <div className="glass-panel-yellow rounded-2xl p-6 relative overflow-hidden">
+                                                <div className="absolute top-0 right-0 p-4 opacity-10"><Icon name="Sparkles" size={40} className="text-amber-500"/></div>
+                                                <h3 className="text-[11px] font-black text-amber-800 uppercase mb-3 flex items-center gap-2 tracking-widest relative z-10">
+                                                    Dostosowanie (IPET / SPE / WOPFU)
+                                                </h3>
+                                                <p className="text-sm text-amber-900 leading-relaxed relative z-10">
+                                                    {scenario.adjustments}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
                             </div>
                         </div>
                     </div>
