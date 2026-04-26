@@ -3,32 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generator Scenariuszy AI PRO - EduBox AI</title>
+    <title>Generator Scenariuszy AI PRO - EduBox Premium</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Lora:ital,wght@0,400;0,700;1,400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,700;1,400&display=swap');
         
-        body { background-color: #f1f5f9; font-family: 'Inter', sans-serif; }
+        body { background-color: #020617; font-family: 'Plus Jakarta Sans', sans-serif; color: #f8fafc; overflow-x: hidden; }
         .scenario-page { font-family: 'Lora', serif; line-height: 1.6; color: #1e293b; }
 
+        .glass-panel { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .glass-nav { background: rgba(2, 6, 23, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+
+        input:focus, select:focus, textarea:focus { box-shadow: 0 0 15px rgba(16, 185, 129, 0.3); border-color: #10b981 !important; }
+
         @media print {
-            body { background: white; }
+            body { background: white; color: black; }
             .print-hidden { display: none !important; }
-            #scenario-container { border: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
+            #scenario-container { border: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; background: white !important; }
             .page-break { page-break-before: always; }
             body, html { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
 
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        @keyframes slide-up { 0% { opacity: 0; transform: translate(-50%, 20px); } 100% { opacity: 1; transform: translate(-50%, 0); } }
+        .animate-toast { animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
-        /* Styl dla szklanych paneli (szybek) */
-        .glass-panel-gray { background: rgba(248, 250, 252, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(226, 232, 240, 0.8); }
-        .glass-panel-yellow { background: rgba(255, 251, 235, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(253, 230, 138, 0.8); }
+        @keyframes pop { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .bot-bubble { animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes blink { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.1); } }
+        .bot-eye { animation: blink 4s infinite; transform-origin: center; }
+        
+        /* Specjalne panele podglądu Worda */
+        .glass-panel-gray-print { background: #f8fafc; border: 1px solid #e2e8f0; }
+        .glass-panel-yellow-print { background: #fffbeb; border: 1px solid #fde68a; }
     </style>
 </head>
 <body>
@@ -38,30 +51,45 @@
         const { useState, useEffect } = React;
 
         const SAMPLES = {
-            wiosna: { title: "Wiosna budzi się do życia", duration: "45-50 minut", group: "18-22 dzieci, wiek 5-6 lat", methods: "Aktywizująca (taniec, drama, kolaż)", main_goal: "Rozwijanie wrażliwości na zmiany w przyrodzie oraz integracja grupy.", custom_goal: "Kształtowanie umiejętności uważnej obserwacji otoczenia.", phases: [ { step_name: "1. Powitanie i krąg poranny", time: "5-6 min", details: "- Dzieci siadają w kręgu na dywanie.\n- Śpiewamy piosenkę powitalną z elementami pokazywania." }, { step_name: "2. Burza mózgów", time: "10 min", details: "- Zadawanie pytań: Po czym poznajemy wiosnę?\n- Prezentacja ilustracji wiosennych kwiatów." } ], materials: ["Kredki", "Szary papier", "Ilustracje kwiatów", "Głośnik bluetooth"], integration: "Język, Przyroda, Muzyka", weather_alternative: "Jeśli pada deszcz, zamiast spaceru robimy wiosenny kącik sensoryczny w sali z zebranych wcześniej liści i mchu.", adjustments: "Dla Jasia (Spektrum autyzmu): Zapewnienie słuchawek wyciszających podczas głośniejszej piosenki powitalnej. Wcześniejsze uprzedzenie o zmianie aktywności. Jasne i krótkie komunikaty." },
-            ziemia: { title: "Dbamy o naszą Ziemię", duration: "45-50 minut", group: "18-22 dzieci, wiek 5-6 lat", methods: "Metoda projektowa, Praktyczne działanie", main_goal: "Kształtowanie podstawowych postaw proekologicznych.", custom_goal: "Uświadomienie dzieciom, jaki wpływ na środowisko ma pojedynczy człowiek.", phases: [ { step_name: "1. Powitanie", time: "5 min", details: "- Piosenka 'Ziemio zielona'." }, { step_name: "2. Segregacja Śmieci - Zabawa", time: "15 min", details: "- Rozsypanie 'czystych' śmieci (kartony, plastikowe butelki) na środku dywanu.\n- Dzieci mają za zadanie wrzucić je do odpowiednich, kolorowych pojemników." } ], materials: ["Globus", "Kolorowe pojemniki", "Czyste opakowania po produktach"], integration: "Przyroda, Matematyka (liczenie wrzuconych elementów)", weather_alternative: "Zabawa ruchowa 'Jestem roślinką' przy muzyce relaksacyjnej zamiast wyjścia do ogrodu.", adjustments: "Dla dzieci z nadpobudliwością (ADHD): Przydzielenie konkretnej, fizycznej roli podczas segregacji śmieci (tzw. 'Kierownik pojemnika niebieskiego'), aby ukierunkować energię na zadanie." }
+            wiosna: { title: "Wiosna budzi się do życia", duration: "45-50 minut", group: "18-22 dzieci, wiek 5-6 lat", methods: "Aktywizująca (taniec, drama, kolaż)", main_goal: "Rozwijanie wrażliwości na zmiany w przyrodzie oraz integracja grupy.", custom_goal: "Kształtowanie umiejętności uważnej obserwacji otoczenia.", phases: [ { step_name: "1. Powitanie i krąg poranny", time: "5-6 min", details: "Nauczyciel: 'Dzień dobry, moje małe ptaszki! Czy widzieliście dziś słońce?'\nUczniowie: Dzieci siadają w kręgu na dywanie i odpowiadają na powitanie." }, { step_name: "2. Burza mózgów", time: "10 min", details: "Nauczyciel: Rozkłada na dywanie ilustracje wiosennych kwiatów. 'Po czym poznajemy wiosnę?'\nUczniowie: Wskazują kwiaty i wymyślają skojarzenia." } ], materials: ["Kredki", "Szary papier", "Ilustracje kwiatów", "Głośnik bluetooth"], integration: "Język, Przyroda, Muzyka", weather_alternative: "Jeśli pada deszcz, zamiast spaceru robimy wiosenny kącik sensoryczny w sali z zebranych wcześniej liści i mchu.", adjustments: "Dla Jasia (Spektrum autyzmu): Zapewnienie słuchawek wyciszających podczas głośniejszej piosenki powitalnej. Wcześniejsze uprzedzenie o zmianie aktywności." },
+            ziemia: { title: "Dbamy o naszą Ziemię", duration: "45-50 minut", group: "18-22 dzieci, wiek 5-6 lat", methods: "Metoda projektowa, Praktyczne działanie", main_goal: "Kształtowanie podstawowych postaw proekologicznych.", custom_goal: "Uświadomienie dzieciom, jaki wpływ na środowisko ma pojedynczy człowiek.", phases: [ { step_name: "1. Wstęp", time: "5 min", details: "Nauczyciel: Włącza piosenkę 'Ziemio zielona' i wręcza dzieciom zielone wstążki.\nUczniowie: Maszerują w rytm muzyki." }, { step_name: "2. Segregacja Śmieci - Gra", time: "15 min", details: "Nauczyciel: Rozsypuje czyste śmieci na środku i stawia 3 kosze.\nUczniowie: Mają za zadanie wrzucić je do odpowiednich, kolorowych pojemników." } ], materials: ["Globus", "Kolorowe pojemniki", "Czyste opakowania"], integration: "Przyroda, Matematyka", weather_alternative: "Zabawa ruchowa 'Jestem roślinką' przy muzyce relaksacyjnej zamiast wyjścia do ogrodu.", adjustments: "Dla dzieci z nadpobudliwością (ADHD): Przydzielenie konkretnej, fizycznej roli podczas segregacji śmieci (tzw. 'Kierownik pojemnika niebieskiego')." }
         };
 
         const Icon = ({ name, size = 20, className = "" }) => {
             const icons = {
-                FileText: (<><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></>),
+                FileText: <><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></>,
                 Sparkles: <path d="m12 3 1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3Z"/>,
                 Printer: <path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/>,
                 Coffee: <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8zM7 2v3M11 2v3M15 2v3"/>,
                 Settings: <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>,
                 Download: <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>,
-                Wand2: <path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.21 1.21 0 0 0 1.72 0L21.64 5.36a1.21 1.21 0 0 0 0-1.72ZM14 7l3 3M5 6v1M19 2v1M10 2v2M7 10H6M22 9h-2M15 2h1"/>
+                Wand2: <path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.21 1.21 0 0 0 1.72 0L21.64 5.36a1.21 1.21 0 0 0 0-1.72ZM14 7l3 3M5 6v1M19 2v1M10 2v2M7 10H6M22 9h-2M15 2h1"/>,
+                Lock: <><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>,
+                AlertCircle: <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>
             };
             return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{icons[name]}</svg>;
         };
+
+        const BotHelperAvatar = () => (
+            <svg viewBox="0 0 100 100" className="w-14 h-14 drop-shadow-md flex-shrink-0" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 30 V15" stroke="#94a3b8" strokeWidth="4" strokeLinecap="round"/>
+                <circle cx="50" cy="12" r="5" fill="#10b981"/>
+                <rect x="25" y="30" width="50" height="40" rx="12" fill="#047857"/>
+                <rect x="32" y="38" width="36" height="22" rx="6" fill="#ffffff"/>
+                <circle cx="40" cy="49" r="3.5" fill="#047857" className="bot-eye"/>
+                <circle cx="60" cy="49" r="3.5" fill="#047857" className="bot-eye"/>
+                <path d="M 45 56 Q 50 60 55 56" stroke="#047857" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+            </svg>
+        );
 
         function App() {
             const [isPremium, setIsPremium] = useState(false);
             const [accessCode, setAccessCode] = useState('');
             const [isGenerating, setIsGenerating] = useState(false);
+            const [toastMessage, setToastMessage] = useState('');
             
             const [botQuickPrompt, setBotQuickPrompt] = useState('');
-            const [botStatus, setBotStatus] = useState('');
+            const [botMessage, setBotMessage] = useState("Cześć! Napisz mi jedno zdanie, np. 'Lekcja o dinozaurach dla 6 latków na 30 minut', a ja sam ustawię odpowiednie suwaki w formularzu poniżej!");
 
             const [params, setParams] = useState({
                 topic: '',
@@ -70,10 +98,9 @@
                 methods: 'Aktywizująca i ruchowa',
                 needs: '',
                 formatType: 'detailed',
-                customGoal: '' // Powrót brakującego pola celu!
+                customGoal: ''
             });
 
-            // Scenariusz z widocznymi "szybkami" od samego startu!
             const [scenario, setScenario] = useState({
                 title: 'Szablon Scenariusza', 
                 duration: 'Wybierz...', 
@@ -82,21 +109,23 @@
                 main_goal: 'Tutaj sztuczna inteligencja wygeneruje profesjonalny cel główny zajęć na podstawie tematu.', 
                 custom_goal: 'Tutaj pojawi się Twój cel opcjonalny.', 
                 phases: [
-                    { step_name: "1. Faza Wstępna", time: "5 min", details: "Szczegóły powitania i wprowadzenia do tematu..." },
+                    { step_name: "1. Faza Wstępna", time: "5 min", details: "Nauczyciel: Wprowadza do tematu...\nUczniowie: Biorą aktywny udział..." },
                     { step_name: "2. Faza Główna", time: "25 min", details: "Zabawy i realizacja tematu..." }
                 ], 
-                materials: ['Tutaj pojawią się potrzebne materiały'], 
+                materials: ['Wpisz temat, aby wygenerować materiały'], 
                 integration: 'AI wskaże powiązania z podstawą programową...', 
                 weather_alternative: 'Alternatywa na niepogodę...', 
-                adjustments: 'Tutaj pojawią się profesjonalne wskazówki do pracy z dziećmi z orzeczeniami (np. autyzm, ADHD) w ramach IPET.'
+                adjustments: 'Tutaj pojawią się profesjonalne wskazówki do pracy z dziećmi z orzeczeniami (np. autyzm, ADHD).'
             });
 
+            const showToast = (msg) => { setToastMessage(msg); setTimeout(() => setToastMessage(''), 4000); };
+
             const handleVerifyCode = () => {
-                if (accessCode.toUpperCase() === 'KAWA2024') { setIsPremium(true); setAccessCode(''); } 
-                else alert('Błędny kod!');
+                if (accessCode.toUpperCase() === 'KAWA2024') { setIsPremium(true); setAccessCode(''); showToast('Odblokowano Premium! 🌟'); setBotMessage("Świetnie! Dzięki Premium możesz generować nieograniczoną ilość epickich, wielostronicowych konspektów gotowych do oddania dyrekcji."); } 
+                else showToast('Błędny kod dostępu!');
             };
 
-            const loadSample = (key) => setScenario(SAMPLES[key]);
+            const loadSample = (key) => { setScenario(SAMPLES[key]); setBotMessage("Załadowano podgląd! Zobacz, jak czytelnie wygląda to w oknie po prawej stronie."); };
 
             const handleBotAutoFill = () => {
                 if(!botQuickPrompt.trim()) return;
@@ -136,217 +165,240 @@
 
                 setParams(newParams);
                 setBotQuickPrompt('');
-                setBotStatus('Sukces! Rubryki poniżej zostały wypełnione. Możesz kliknąć "Wygeneruj"!');
-                setTimeout(() => setBotStatus(''), 5000);
+                setBotMessage('Bum! 💥 Rozkodowałem Twój tekst i perfekcyjnie poustawiałem suwaki w konfiguratorze. Możesz generować!');
             };
 
             const generateScenario = async () => {
-                if (!params.topic.trim()) return alert('Wpisz temat zajęć!');
+                if (!params.topic.trim()) return showToast('Wpisz najpierw temat zajęć!');
                 setIsGenerating(true);
+                setBotMessage("Przeszukuję podstawę programową, tworzę haki na uwagę (hooks) i piszę dokładne skrypty. Chwileczkę...");
                 
-                const systemPrompt = `Jesteś wybitnym metodykiem edukacji przedszkolnej. Odpowiadaj WYŁĄCZNIE formatem JSON.
-                Struktura: { "title": "...", "duration": "...", "group": "...", "methods": "...", "main_goal": "...", "custom_goal": "...", "phases": [{ "step_name": "...", "time": "...", "details": "..." }], "materials": ["..."], "integration": "...", "weather_alternative": "...", "adjustments": "..." }`;
+                let detailInstruction = params.formatType === 'detailed' 
+                    ? "Wymagam BARDZO ROZBUDOWANEGO konspektu. W sekcji 'phases' -> 'details' napisz dokładnie, wręcz z podziałem ról: co mówi Nauczyciel i co odpowiada Uczeń. Opisz dokładnie przebieg zabaw. Ten dokument ma być gotowcem kopiuj-wklej na zajęcia." 
+                    : "Wymagam ZWIĘZŁEGO konspektu (tylko główne, krótkie punkty). Bez długich opisów.";
 
-                const userPrompt = `Temat: ${params.topic}. Grupa: ${params.age}. Czas: ${params.duration}. Metoda: ${params.methods}. Potrzeby: ${params.needs}. Cel nauczyciela: ${params.customGoal}.`;
+                const systemPrompt = `Jesteś wybitnym polskim metodykiem edukacji i ekspertem prawa oświatowego. Odpowiadaj WYŁĄCZNIE w poprawnym formacie JSON.
+                ${detailInstruction}
+                Struktura JSON, której MUSISZ użyć:
+                { 
+                    "title": "...", 
+                    "duration": "...", 
+                    "group": "...", 
+                    "methods": "...", 
+                    "main_goal": "...", 
+                    "custom_goal": "...", 
+                    "phases": [{ "step_name": "...", "time": "...", "details": "..." }], 
+                    "materials": ["..."], 
+                    "integration": "...", 
+                    "weather_alternative": "...", 
+                    "adjustments": "..." 
+                }`;
+
+                const userPrompt = `Temat: ${params.topic}. Grupa: ${params.age}. Czas: ${params.duration}. Metoda: ${params.methods}. Potrzeby SPE w grupie: ${params.needs || 'Brak'}. Cel nauczyciela (dodatkowy): ${params.customGoal || 'Brak'}. Zbuduj na tej podstawie profesjonalny scenariusz z nowoczesnymi i kreatywnymi metodami.`;
 
                 try {
                     const res = await fetch('/api/chat', {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ prompt: userPrompt, system: systemPrompt })
+                        body: JSON.stringify({ prompt: userPrompt, system: systemPrompt, temperature: 0.4, format: "json", model: "gpt-4o-mini" })
                     });
                     const data = await res.json();
-                    let text = data.text;
-                    const start = text.indexOf('{');
-                    const end = text.lastIndexOf('}');
-                    setScenario(JSON.parse(text.substring(start, end + 1)));
+                    if (!res.ok) throw new Error(data.details || data.message || "Błąd z serwera");
+
+                    let cleanText = data.text;
+                    if (cleanText.includes('"reasoning_content"')) {
+                        const startIdx = cleanText.indexOf('"content":"');
+                        if (startIdx !== -1) {
+                            let extracted = cleanText.substring(startIdx + 11).replace(/"\s*}\s*$/, '').replace(/"$/, ''); 
+                            cleanText = extracted.replace(/\\n/g, '\n').replace(/\\"/g, '"'); 
+                        }
+                    } else {
+                        try { const outerObj = JSON.parse(cleanText); if(outerObj.content) cleanText = outerObj.content; else if (outerObj.choices) cleanText = outerObj.choices[0].message.content; } catch(e){}
+                    }
+                    cleanText = cleanText.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+                    let jsonStr = cleanText.replace(/```json/gi, '').replace(/```/g, '').trim();
+                    if(jsonStr.indexOf('{') !== -1) jsonStr = jsonStr.substring(jsonStr.indexOf('{'), jsonStr.lastIndexOf('}') + 1);
+
+                    setScenario(JSON.parse(jsonStr));
+                    setBotMessage("Gotowe! Masz przed sobą genialny scenariusz. Kliknij pobierz do Worda, by go zapisać!");
                 } catch (error) {
-                    console.error(error); alert("Błąd serwera.");
+                    console.error(error); showToast(`Błąd połączenia z AI: ${error.message}`);
+                    setBotMessage("Ojej, serwer chwilowo odrzucił zapytanie. Spróbuj kliknąć wygeneruj jeszcze raz!");
                 } finally { setIsGenerating(false); }
             };
 
             const exportToWord = () => {
-                const content = document.getElementById('scenario-container').innerHTML;
-                const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Scenariusz</title><style>body {font-family: Arial; font-size: 11pt;} h1 {font-size: 18pt; color: #059669;} h2 {font-size: 14pt; border-bottom: 2px solid #059669; padding-bottom: 5px; margin-top: 20px;} b {color: #1e293b;}</style></head><body>`;
+                const content = document.getElementById('scenario-render-area').innerHTML;
+                const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Scenariusz EduBox</title><style>body {font-family: 'Times New Roman', serif; font-size: 11pt; line-height: 1.5;} h1 {font-size: 18pt; color: #047857; text-align: center; text-transform: uppercase; margin-bottom: 20px;} h2 {font-size: 14pt; border-bottom: 2px solid #10b981; padding-bottom: 5px; margin-top: 20px; color: #047857;} h3 {font-size: 12pt; color: #334155; margin-top: 15px;} b {color: #1e293b;} .box {background-color: #f8fafc; padding: 15px; border: 1px solid #cbd5e1; margin-bottom: 15px;}</style></head><body>`;
                 const footer = `</body></html>`;
                 const blob = new Blob(['\ufeff', header + content + footer], { type: 'application/msword' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = `scenariusz_${scenario.title.replace(/\s+/g, '_')}.doc`;
+                link.download = `Scenariusz_EduBox_${Date.now()}.doc`;
                 link.click();
             };
 
             return (
-                <div className="min-h-screen flex flex-col relative">
+                <div className="min-h-screen flex flex-col relative overflow-x-hidden">
+                    {toastMessage && <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[200] bg-emerald-600 text-white px-6 py-3 rounded-2xl shadow-[0_0_30px_rgba(16,185,129,0.4)] font-bold text-sm animate-toast flex items-center gap-3 border border-emerald-400"><Icon name="AlertCircle" size={18} />{toastMessage}</div>}
+
                     {isGenerating && (
-                        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex flex-col items-center justify-center text-white">
-                            <div className="bg-white p-8 rounded-3xl flex flex-col items-center space-y-4 max-w-sm text-slate-800">
-                                <div className="w-16 h-16 border-8 border-emerald-100 border-t-emerald-600 rounded-full animate-spin"></div>
-                                <h3 className="text-xl font-black">AI układa plan zajęć...</h3>
+                        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] flex flex-col items-center justify-center text-white">
+                            <div className="glass-panel p-10 rounded-3xl flex flex-col items-center space-y-6 max-w-sm border border-emerald-500/20 shadow-[0_0_50px_rgba(16,185,129,0.2)]">
+                                <div className="w-16 h-16 border-4 border-slate-700 border-t-emerald-500 rounded-full animate-spin"></div>
+                                <div className="text-center"><h3 className="text-xl font-bold mb-2 text-white">AI układa metodykę...</h3><p className="text-xs text-slate-400 font-medium">To potrwa kilkanaście sekund.</p></div>
                             </div>
                         </div>
                     )}
 
-                    <nav className="bg-white border-b px-8 py-4 flex justify-between items-center print-hidden sticky top-0 z-50 shadow-sm">
-                        <div className="flex items-center space-x-3 font-black text-2xl tracking-tight text-slate-800">
-                            <div className="bg-emerald-600 p-2.5 rounded-xl text-white shadow-lg shadow-emerald-200"><Icon name="FileText" size={24}/></div>
-                            <span>EduBox<span className="text-emerald-600">AI</span></span>
-                        </div>
-                        <div className="flex items-center space-x-4">
-                            {!isPremium && (
-                                <div className="flex items-center space-x-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
-                                    <input value={accessCode} onChange={e => setAccessCode(e.target.value)} placeholder="Kod Premium..." className="p-2 bg-transparent text-sm w-32 outline-none font-medium"/>
-                                    <button onClick={handleVerifyCode} className="p-2 bg-emerald-600 text-white rounded-lg"><Icon name="Sparkles" size={16}/></button>
-                                </div>
-                            )}
-                            <button onClick={() => window.open('https://buycoffee.to/magiccolor')} className="flex items-center space-x-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-transform active:scale-95 text-sm">
-                                <Icon name="Coffee" size={20} /><span>Postaw Kawę</span>
-                            </button>
+                    <nav className="fixed top-0 w-full z-50 glass-nav py-4 px-6 print-hidden">
+                        <div className="max-w-7xl mx-auto flex justify-between items-center">
+                            <div className="flex items-center space-x-3 font-extrabold text-xl tracking-tight cursor-pointer" onClick={() => window.scrollTo(0,0)}>
+                                <div className="bg-gradient-to-br from-emerald-500 to-teal-600 p-2 rounded-xl text-white shadow-[0_0_15px_rgba(16,185,129,0.5)]"><Icon name="FileText" size={22}/></div>
+                                <span>Scenariusz<span className="text-emerald-500">PRO</span></span>
+                            </div>
+                            <div className="flex items-center space-x-4">
+                                {!isPremium && (
+                                    <div className="hidden md:flex items-center space-x-2 bg-slate-900 p-1.5 rounded-xl border border-slate-700">
+                                        <input value={accessCode} onChange={e => setAccessCode(e.target.value)} placeholder="Kod Premium..." className="p-2 bg-transparent text-sm w-32 outline-none font-medium text-white placeholder-slate-500"/>
+                                        <button onClick={handleVerifyCode} className="p-2 text-white rounded-lg bg-emerald-600 hover:bg-emerald-500 transition-colors shadow-md"><Icon name="Lock" size={16}/></button>
+                                    </div>
+                                )}
+                                <button onClick={() => window.open('https://buycoffee.to/magiccolor')} className="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white px-5 py-2.5 rounded-xl font-bold transition-all active:scale-95 text-sm shadow-md">
+                                    <Icon name="Coffee" size={18} className="text-amber-400"/><span>Postaw Kawę</span>
+                                </button>
+                            </div>
                         </div>
                     </nav>
 
-                    <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full print:block print:p-0">
-                        
+                    <div className="max-w-7xl mx-auto px-4 pt-32 pb-24 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full print:block print:p-0 relative z-10">
                         <div className="lg:col-span-4 space-y-6 print-hidden">
                             
-                            {/* BOTA AUTO-WYPEŁNIACZ (Czysty, profesjonalny wygląd) */}
-                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-4">
-                                <h2 className="font-bold flex items-center text-slate-800 text-sm uppercase tracking-widest border-b pb-4"><Icon name="Wand2" className="mr-2 text-indigo-500"/> Asystent AI (Auto-Wypełnianie)</h2>
-                                <p className="text-[11px] text-slate-500 font-medium">Napisz jedno zdanie, a AI samo ustawi rubryki poniżej (np. "O kosmosie dla 6 latków na 30 minut").</p>
-                                
-                                <div className="flex bg-slate-50 p-1.5 rounded-xl border border-slate-200 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
-                                    <input 
-                                        type="text" 
-                                        value={botQuickPrompt}
-                                        onChange={(e) => setBotQuickPrompt(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && handleBotAutoFill()}
-                                        placeholder="Wpisz polecenie..." 
-                                        className="flex-1 bg-transparent px-3 text-sm outline-none font-medium placeholder-slate-400"
-                                    />
-                                    <button onClick={handleBotAutoFill} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-lg transition-colors">
-                                        Wypełnij
-                                    </button>
+                            {/* EduBot Auto-Fill */}
+                            <div className="glass-panel p-6 md:p-8 rounded-[2rem] space-y-4">
+                                <h2 className="font-bold flex items-center text-emerald-400 text-sm uppercase tracking-widest border-b border-slate-700/50 pb-4"><Icon name="Wand2" className="mr-2" size={18}/> Asystent Auto-Wypełniania</h2>
+                                <div className="flex bg-slate-900 p-1.5 rounded-xl border border-slate-700 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-900 transition-all">
+                                    <input type="text" value={botQuickPrompt} onChange={(e) => setBotQuickPrompt(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleBotAutoFill()} placeholder="np. Lekcja o ułamkach na 45 min..." className="flex-1 bg-transparent px-3 text-sm outline-none font-medium text-white placeholder-slate-500"/>
+                                    <button onClick={handleBotAutoFill} className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-lg transition-colors">Uzupełnij</button>
                                 </div>
-                                {botStatus && <p className="text-[10px] text-emerald-600 font-bold mt-2 text-center">{botStatus}</p>}
                             </div>
 
-                            {/* POWRÓT ZAKŁADKI Z PRZYKŁADAMI */}
-                            <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 space-y-3">
-                                <h2 className="font-bold flex items-center text-slate-800 text-sm uppercase tracking-widest border-b pb-3"><Icon name="FileText" className="mr-2 text-emerald-500"/> Gotowe Przykłady</h2>
-                                <div className="flex gap-2">
-                                    <button onClick={() => loadSample('wiosna')} className="flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold py-2.5 px-3 rounded-xl transition-colors border border-indigo-100 flex items-center justify-center gap-1">🌸 Wiosna</button>
-                                    <button onClick={() => loadSample('ziemia')} className="flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold py-2.5 px-3 rounded-xl transition-colors border border-emerald-100 flex items-center justify-center gap-1">🌍 Dzień Ziemi</button>
+                            {/* Konfigurator */}
+                            <div className="glass-panel p-6 md:p-8 rounded-[2rem] space-y-6">
+                                <div className="flex justify-between items-center border-b border-slate-700/50 pb-4">
+                                    <h2 className="font-bold flex items-center text-slate-300 text-sm uppercase tracking-widest"><Icon name="Settings" className="mr-2 text-emerald-500" size={18}/> Konfigurator Metodyczny</h2>
                                 </div>
-                                <p className="text-[10px] text-slate-400 text-center italic mt-1">Kliknij, aby przetestować możliwości układu.</p>
-                            </div>
-
-                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-5">
-                                <h2 className="font-bold flex items-center text-slate-800 text-sm uppercase tracking-widest border-b pb-4"><Icon name="Settings" className="mr-2 text-emerald-500"/> Konfiguracja Ręczna</h2>
                                 <div className="space-y-4">
-                                    <div><label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Temat lekcji</label><input type="text" value={params.topic} onChange={e => setParams({...params, topic: e.target.value})} className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-semibold" /></div>
-                                    
-                                    {/* POWRÓT BRAKUJĄCEGO POLA CELU */}
-                                    <div>
-                                        <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Twój cel (opcjonalnie)</label>
-                                        <input type="text" value={params.customGoal} onChange={e => setParams({...params, customGoal: e.target.value})} placeholder="np. nauka współpracy w grupie" className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 text-sm" />
-                                    </div>
+                                    <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Temat zajęć</label><input type="text" value={params.topic} onChange={e => setParams({...params, topic: e.target.value})} className="w-full p-4 bg-slate-900 border border-slate-700 rounded-xl outline-none text-white text-sm focus:border-emerald-500 transition-colors" /></div>
+                                    <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Twój cel (opcjonalnie)</label><input type="text" value={params.customGoal} onChange={e => setParams({...params, customGoal: e.target.value})} placeholder="np. nauka współpracy..." className="w-full p-4 bg-slate-900 border border-slate-700 rounded-xl outline-none text-white text-sm focus:border-emerald-500 transition-colors" /></div>
 
                                     <div className="grid grid-cols-2 gap-3">
-                                        <div><label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Wiek</label><select value={params.age} onChange={e => setParams({...params, age: e.target.value})} className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"><option>3-4 latki</option><option>5-6 latki</option><option>Klasy I-III</option><option>Klasy IV-VIII</option></select></div>
-                                        <div><label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Czas</label><select value={params.duration} onChange={e => setParams({...params, duration: e.target.value})} className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"><option>15-20 min</option><option>30-40 min</option><option>45-50 min</option><option>90 min</option></select></div>
+                                        <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Wiek</label><select value={params.age} onChange={e => setParams({...params, age: e.target.value})} className="w-full p-4 bg-slate-900 border border-slate-700 rounded-xl outline-none text-white text-sm appearance-none focus:border-emerald-500"><option className="bg-slate-900">3-4 latki</option><option className="bg-slate-900">5-6 latki</option><option className="bg-slate-900">Klasy I-III</option><option className="bg-slate-900">Klasy IV-VIII</option></select></div>
+                                        <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Czas</label><select value={params.duration} onChange={e => setParams({...params, duration: e.target.value})} className="w-full p-4 bg-slate-900 border border-slate-700 rounded-xl outline-none text-white text-sm appearance-none focus:border-emerald-500"><option className="bg-slate-900">15-20 min</option><option className="bg-slate-900">30-40 min</option><option className="bg-slate-900">45-50 min</option><option className="bg-slate-900">90 min</option></select></div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">
-                                        <div><label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Metoda</label><select value={params.methods} onChange={e => setParams({...params, methods: e.target.value})} className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"><option>Aktywizująca i ruchowa</option><option>Pokazowa / Obrazowa</option><option>Metoda projektowa</option><option>Praktyczne działanie</option><option>Podająca (opowiadanie)</option></select></div>
-                                        <div><label className="text-[10px] font-bold text-emerald-600 uppercase ml-1">Format</label><select value={params.formatType} onChange={e => setParams({...params, formatType: e.target.value})} className="w-full mt-1 p-3 bg-emerald-50 border-emerald-100 rounded-xl outline-none font-bold text-emerald-700"><option value="detailed">📜 Lista (Punkty)</option><option value="concise">📝 Tekst</option></select></div>
+                                        <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Metoda główna</label><select value={params.methods} onChange={e => setParams({...params, methods: e.target.value})} className="w-full p-4 bg-slate-900 border border-slate-700 rounded-xl outline-none text-white text-sm appearance-none focus:border-emerald-500"><option className="bg-slate-900">Aktywizująca i ruchowa</option><option className="bg-slate-900">Pokazowa / Obrazowa</option><option className="bg-slate-900">Metoda projektowa</option><option className="bg-slate-900">Praktyczne działanie</option><option className="bg-slate-900">Podająca (opowiadanie)</option></select></div>
+                                        <div><label className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block mb-2">Format zapisu</label><select value={params.formatType} onChange={e => setParams({...params, formatType: e.target.value})} className="w-full p-4 bg-emerald-900/30 border border-emerald-500/50 rounded-xl outline-none text-emerald-200 font-bold text-sm appearance-none focus:border-emerald-500"><option value="detailed" className="bg-slate-900">📜 Epicki (Kopiuj-Wklej)</option><option value="concise" className="bg-slate-900">📝 Zwięzły Szkic</option></select></div>
                                     </div>
-                                    <div><label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Dostosowanie (SPE)</label><input type="text" value={params.needs} onChange={e => setParams({...params, needs: e.target.value})} placeholder="np. dziecko z ADHD" className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm" /></div>
+                                    <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Dostosowanie (SPE)</label><input type="text" value={params.needs} onChange={e => setParams({...params, needs: e.target.value})} placeholder="np. dziecko z ADHD" className="w-full p-4 bg-slate-900 border border-slate-700 rounded-xl outline-none text-white text-sm focus:border-emerald-500 transition-colors" /></div>
                                 </div>
-                                <button onClick={generateScenario} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-2xl font-black text-sm tracking-widest shadow-lg flex justify-center items-center gap-2 transition-colors"><Icon name="Sparkles" size={20}/> WYGENERUJ SCENARIUSZ</button>
+                                
+                                {!isPremium ? (
+                                    <div className="p-6 rounded-xl border-2 border-dashed border-slate-700 flex flex-col items-center justify-center text-center gap-3 bg-slate-900/50">
+                                        <div className="p-3 bg-slate-800 rounded-full"><Icon name="Lock" size={24} className="text-slate-400"/></div>
+                                        <div><span className="text-sm font-bold text-slate-300 block mb-1">Funkcja zablokowana</span><span className="text-xs text-slate-500">Wpisz kod Premium na górnym pasku.</span></div>
+                                    </div>
+                                ) : (
+                                    <button onClick={generateScenario} className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-xl font-black text-sm tracking-widest shadow-[0_0_20px_rgba(16,185,129,0.3)] flex justify-center items-center gap-2 transition-all active:scale-95 uppercase">
+                                        <Icon name="Sparkles" size={20}/> Generuj z AI
+                                    </button>
+                                )}
                             </div>
 
-                            <div className="grid grid-cols-1 gap-3">
-                                <button onClick={() => window.print()} className="w-full bg-slate-800 hover:bg-slate-900 text-white py-4 rounded-2xl font-bold flex justify-center items-center gap-2 transition-colors"><Icon name="Printer" size={20}/> DRUKUJ DO PDF</button>
-                                <button onClick={exportToWord} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold flex justify-center items-center gap-2 transition-colors"><Icon name="Download" size={20}/> EKSPORT DO WORD</button>
+                            {/* EduBot Pomocnik */}
+                            <div className="p-5 rounded-3xl shadow-lg border flex items-start gap-4 animate-[reveal_0.3s_ease-out] transition-colors bg-emerald-900/20 border-emerald-500/30">
+                                <BotHelperAvatar />
+                                <div className="flex-1 pt-1">
+                                    <h4 className="font-black text-xs uppercase tracking-widest mb-1.5 text-emerald-400">EduBot Metodyk</h4>
+                                    <p className="text-sm font-medium leading-relaxed text-slate-300 bot-bubble" key={botMessage}>{botMessage}</p>
+                                </div>
+                            </div>
+                            
+                            <div className="flex gap-2">
+                                <button onClick={() => loadSample('wiosna')} className="flex-1 glass-panel hover:bg-slate-800 text-slate-300 text-xs font-bold py-3 px-3 rounded-xl transition-colors border border-slate-700 flex items-center justify-center gap-2">🌸 Demo: Wiosna</button>
+                                <button onClick={() => loadSample('ziemia')} className="flex-1 glass-panel hover:bg-slate-800 text-slate-300 text-xs font-bold py-3 px-3 rounded-xl transition-colors border border-slate-700 flex items-center justify-center gap-2">🌍 Demo: Ziemia</button>
                             </div>
                         </div>
 
-                        {/* WIDOK SCENARIUSZA Z PRZYWRÓCONYMI SZYBKAMI */}
-                        <div className="lg:col-span-8 flex justify-center items-start overflow-x-auto pb-10">
-                            <div id="scenario-container" className="bg-white w-full max-w-[210mm] min-h-[297mm] shadow-2xl p-12 md:p-16 scenario-page text-slate-900 relative">
-                                <div className="border-b-4 border-emerald-600 pb-8 mb-10">
-                                    <h1 className="text-3xl md:text-4xl font-black text-slate-800 mb-8 uppercase tracking-tight">{scenario?.title}</h1>
-                                    <div className="grid grid-cols-2 gap-4 border-t border-b border-slate-100 py-4">
-                                        <div className="text-sm font-bold text-slate-500 uppercase flex flex-col"><span>Wiek / Grupa:</span><span className="text-emerald-700 text-base">{scenario?.group}</span></div>
-                                        <div className="text-sm font-bold text-slate-500 uppercase flex flex-col"><span>Czas trwania:</span><span className="text-emerald-700 text-base">{scenario?.duration}</span></div>
-                                    </div>
-                                </div>
-                                <div className="space-y-10">
-                                    <section>
-                                        <h2 className="text-lg font-black text-emerald-700 uppercase border-l-4 border-emerald-500 pl-4 mb-4 italic">I. Cele i założenia</h2>
-                                        <div className="pl-5 space-y-4">
-                                            <div className="whitespace-pre-wrap text-slate-700 text-sm leading-relaxed">{scenario?.main_goal}</div>
-                                            {scenario?.custom_goal && <div className="whitespace-pre-wrap text-slate-700 text-sm leading-relaxed"><span className="font-bold">Cel dodatkowy: </span>{scenario?.custom_goal}</div>}
-                                        </div>
-                                    </section>
-                                    
-                                    <section>
-                                        <h2 className="text-lg font-black text-emerald-700 uppercase border-l-4 border-emerald-500 pl-4 mb-6 italic">II. Przebieg zajęć</h2>
-                                        <div className="space-y-8 pl-2">
-                                            {scenario?.phases?.map((phase, idx) => (
-                                                <div key={idx} className="relative border-l-2 border-emerald-200 pl-6 pb-2">
-                                                    <div className="absolute -left-[9px] top-1 w-4 h-4 bg-white border-2 border-emerald-500 rounded-full"></div>
-                                                    <div className="flex justify-between items-baseline mb-2">
-                                                        <h3 className="font-bold text-slate-800 text-base">{phase?.step_name}</h3>
-                                                        <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full uppercase">{phase?.time}</span>
-                                                    </div>
-                                                    <div className="whitespace-pre-wrap text-slate-600 text-sm leading-relaxed">{phase?.details}</div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </section>
+                        <div className="lg:col-span-8 flex justify-center items-start overflow-x-auto pb-10 print:block">
+                            <div className="w-full max-w-[210mm] animate-[reveal_0.5s_ease-out] print:max-w-full">
+                                <div className="flex justify-end gap-3 mb-6 print-hidden bg-slate-900/50 p-2 rounded-2xl border border-slate-800 backdrop-blur-md">
+                                    <button onClick={exportToWord} className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all text-sm shadow-[0_0_15px_rgba(16,185,129,0.3)] active:scale-95"><Icon name="Download" size={18}/> Word (.docx)</button>
+                                    <button onClick={() => window.print()} className="flex-1 sm:flex-none bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all text-sm active:scale-95"><Icon name="Printer" size={18}/> Drukuj PDF</button>
                                 </div>
 
-                                {/* POWRÓT SZKLANYCH PANELI: UWAGI METODYCZNE I IPET */}
-                                {(scenario?.materials?.length > 0 || scenario?.integration || scenario?.weather_alternative || scenario?.adjustments) && (
-                                    <div className="mt-12 glass-panel-gray rounded-3xl p-8 break-inside-avoid">
-                                        <h2 className="text-base font-black text-slate-800 uppercase mb-5 flex items-center gap-2">
-                                            <Icon name="Settings" size={20} className="text-slate-500" /> Uwagi Metodyczne i Środki
-                                        </h2>
-                                        
-                                        <div className="space-y-3 text-sm text-slate-700 mb-6">
-                                            {scenario?.materials?.length > 0 && (
-                                                <div><span className="font-bold text-slate-900">Materiały i pomoce: </span> {Array.isArray(scenario.materials) ? scenario.materials.join(', ') : scenario.materials}</div>
-                                            )}
-                                            {scenario?.integration && (
-                                                <div><span className="font-bold text-slate-900">Integracja treści: </span> {scenario.integration}</div>
-                                            )}
-                                            {scenario?.weather_alternative && (
-                                                <div><span className="font-bold text-slate-900">Wersja alternatywna (np. niepogoda): </span> {scenario.weather_alternative}</div>
-                                            )}
-                                        </div>
-
-                                        {scenario?.adjustments && scenario.adjustments !== "Brak" && (
-                                            <div className="glass-panel-yellow rounded-2xl p-6 relative overflow-hidden">
-                                                <div className="absolute top-0 right-0 p-4 opacity-10"><Icon name="Sparkles" size={40} className="text-amber-500"/></div>
-                                                <h3 className="text-[11px] font-black text-amber-800 uppercase mb-3 flex items-center gap-2 tracking-widest relative z-10">
-                                                    Dostosowanie (IPET / SPE / WOPFU)
-                                                </h3>
-                                                <p className="text-sm text-amber-900 leading-relaxed relative z-10">
-                                                    {scenario.adjustments}
-                                                </p>
+                                <div id="scenario-container" className="bg-white shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-12 md:p-16 scenario-page text-slate-900 rounded-sm min-h-[297mm]">
+                                    <div id="scenario-render-area">
+                                        <div className="border-b-4 border-emerald-600 pb-6 mb-8 text-center">
+                                            <div className="text-xs font-black uppercase tracking-widest mb-3 opacity-60 text-emerald-800">Scenariusz EduBox AI</div>
+                                            <h1 className="text-3xl md:text-4xl font-black text-slate-800 mb-6 uppercase tracking-tight">{scenario?.title}</h1>
+                                            <div className="flex justify-center gap-8 border-t border-slate-200 pt-4">
+                                                <div className="text-sm font-bold text-slate-500 uppercase flex flex-col items-center"><span>Grupa:</span><span className="text-emerald-700 text-base">{scenario?.group}</span></div>
+                                                <div className="text-sm font-bold text-slate-500 uppercase flex flex-col items-center"><span>Czas:</span><span className="text-emerald-700 text-base">{scenario?.duration}</span></div>
                                             </div>
-                                        )}
-                                    </div>
-                                )}
+                                        </div>
+                                        
+                                        <div className="space-y-8">
+                                            <section>
+                                                <h2 className="text-lg font-black text-emerald-700 uppercase border-l-4 border-emerald-500 pl-4 mb-4 italic bg-emerald-50 py-1">I. Cele i założenia</h2>
+                                                <div className="pl-5 space-y-4">
+                                                    <div className="whitespace-pre-wrap text-slate-800 text-sm leading-relaxed"><span className="font-bold">Cel główny: </span>{scenario?.main_goal}</div>
+                                                    {scenario?.custom_goal && scenario.custom_goal !== 'Brak' && <div className="whitespace-pre-wrap text-slate-800 text-sm leading-relaxed"><span className="font-bold">Cel dodatkowy: </span>{scenario?.custom_goal}</div>}
+                                                    <div className="whitespace-pre-wrap text-slate-800 text-sm leading-relaxed"><span className="font-bold">Metody: </span>{scenario?.methods}</div>
+                                                </div>
+                                            </section>
+                                            
+                                            <section>
+                                                <h2 className="text-lg font-black text-emerald-700 uppercase border-l-4 border-emerald-500 pl-4 mb-6 italic bg-emerald-50 py-1">II. Przebieg zajęć (Skrypt)</h2>
+                                                <div className="space-y-6 pl-2">
+                                                    {scenario?.phases?.map((phase, idx) => (
+                                                        <div key={idx} className="relative border border-slate-200 rounded-xl p-5 bg-slate-50 shadow-sm page-break-inside-avoid">
+                                                            <div className="flex justify-between items-center mb-3 border-b border-slate-200 pb-2">
+                                                                <h3 className="font-bold text-slate-800 text-base uppercase">{phase?.step_name}</h3>
+                                                                <span className="text-[10px] font-black text-white bg-emerald-600 px-3 py-1 rounded-full uppercase">{phase?.time}</span>
+                                                            </div>
+                                                            <div className="whitespace-pre-wrap text-slate-700 text-sm leading-relaxed">{phase?.details}</div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </section>
 
+                                            {(scenario?.materials?.length > 0 || scenario?.integration || scenario?.weather_alternative || scenario?.adjustments) && (
+                                                <section className="mt-12 border-t-2 border-slate-200 pt-8 page-break-inside-avoid">
+                                                    <h2 className="text-base font-black text-slate-800 uppercase mb-5 flex items-center gap-2"><Icon name="Settings" size={20} className="text-slate-500" /> Uwagi Metodyczne</h2>
+                                                    <div className="space-y-3 text-sm text-slate-800 mb-6 bg-slate-50 p-5 rounded-xl border border-slate-200">
+                                                        {scenario?.materials?.length > 0 && <div><span className="font-bold text-emerald-700">Materiały: </span> {Array.isArray(scenario.materials) ? scenario.materials.join(', ') : scenario.materials}</div>}
+                                                        {scenario?.integration && <div><span className="font-bold text-emerald-700">Integracja: </span> {scenario.integration}</div>}
+                                                        {scenario?.weather_alternative && <div><span className="font-bold text-emerald-700">Alternatywa (np. deszcz): </span> {scenario.weather_alternative}</div>}
+                                                    </div>
+
+                                                    {scenario?.adjustments && scenario.adjustments !== "Brak" && (
+                                                        <div className="bg-amber-50 rounded-xl p-5 border border-amber-200 relative overflow-hidden mt-4">
+                                                            <h3 className="text-xs font-black text-amber-800 uppercase mb-2 flex items-center gap-2 tracking-widest"><Icon name="Sparkles" size={16} className="text-amber-500"/> Dostosowanie (SPE)</h3>
+                                                            <p className="text-sm text-amber-900 leading-relaxed font-medium">{scenario.adjustments}</p>
+                                                        </div>
+                                                    )}
+                                                </section>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             );
         }
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        const root = ReactDOM.createRoot(document.getElementById('root')); root.render(<App />);
     </script>
 </body>
 </html>
